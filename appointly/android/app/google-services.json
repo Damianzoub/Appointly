@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "547136946132",
+    "project_id": "appointly-davag-2025",
+    "storage_bucket": "appointly-davag-2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547136946132:android:a9ce09e8e5c05b1e5a6041",
+        "android_client_info": {
+          "package_name": "com.example.appointly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsinBN20b9Gy9ikVkL2JHGr3z14reTLm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
