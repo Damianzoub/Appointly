@@ -6,12 +6,7 @@ class AppRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Booking App",
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      home: const HomeShell(),
-    );
+    return const HomeShell();
   }
 }
 
