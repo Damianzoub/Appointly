@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'language_provider.dart';
 import 'l10n/app_localizations.dart';
-// IMPORTANT: this import path must match your generated file location
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -24,7 +24,9 @@ class MainApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Appointly',
 
+      // Localization
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -32,17 +34,68 @@ class MainApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      localeResolutionCallback: (locale,supportedLocales){
-        if (locale==null) return const Locale('en');
-        for (final supported in supportedLocales){
-          if (supported.languageCode== locale.languageCode){
-            return supported;
-          }
-        }
-        return const Locale('en');
-      },
-      // Keep your theme here (NOT inside app.dart anymore)
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      locale: localeProvider.locale,
+
+      // MODERN THEME - ΧΩΡΙΣ CARDTHEME
+      theme: ThemeData(
+        useMaterial3: true,
+        // Ορίζουμε το ColorScheme ρητά για να ελέγξουμε το λευκό χρώμα των επιφανειών
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.indigo,
+          surface: Colors.white, // Όλες οι κάρτες και τα panels θα είναι λευκά
+          surfaceTint:
+              Colors.white, // Αφαιρεί την "μοβ" απόχρωση του Material 3
+        ),
+
+        // Στυλ για τα TextFields (Input)
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade200),
+          ),
+        ),
+
+        // Στυλ για τα Κουμπιά
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+
+        // Στυλ για το AppBar
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          titleTextStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        // Στυλ για το Bottom Navigation
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: Colors.indigo.withOpacity(0.1),
+          height: 70,
+        ),
+      ),
 
       home: const AppRoot(),
     );
