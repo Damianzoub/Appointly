@@ -104,44 +104,122 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Booking App'**
+  /// **'Appointly'**
   String get appTitle;
 
-  /// No description provided for @home.
+  /// No description provided for @homeTitle.
   ///
   /// In en, this message translates to:
   /// **'Home'**
-  String get home;
+  String get homeTitle;
 
-  /// No description provided for @book.
+  /// No description provided for @bookTitle.
   ///
   /// In en, this message translates to:
   /// **'Book'**
-  String get book;
+  String get bookTitle;
 
-  /// No description provided for @welcome.
+  /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome'**
-  String get welcome;
+  /// **'Profile'**
+  String get profileTitle;
 
-  /// No description provided for @chooseLanguage.
+  /// No description provided for @welcomeBack.
   ///
   /// In en, this message translates to:
-  /// **'Choose Language'**
-  String get chooseLanguage;
+  /// **'Welcome, {name}!'**
+  String welcomeBack(String name);
 
-  /// No description provided for @confirm.
+  /// No description provided for @homeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Confirm'**
-  String get confirm;
+  /// **'Here you can view upcoming appointments and manage your profile.'**
+  String get homeSubtitle;
+
+  /// No description provided for @noAppointmentsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no appointments scheduled for today.'**
+  String get noAppointmentsToday;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @notLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not logged in'**
+  String get notLoggedIn;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
 
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @logoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutTitle;
+
+  /// No description provided for @logoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirm;
+
+  /// No description provided for @loggedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged out successfully'**
+  String get loggedOut;
+
+  /// No description provided for @goToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to login'**
+  String get goToLogin;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileUpdated;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

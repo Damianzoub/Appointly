@@ -1,10 +1,32 @@
 {
-    "appTitle": "Booking App",
-    "home": "Home",
-    "book": "Book",
-    "welcome": "Welcome",
-    "chooseLanguage": "Choose Language",
-    "confirm": "Confirm",
-    "cancel": "Cancel"
-  }
-  
+  "appTitle": "Appointly",
+  "homeTitle": "Home",
+  "bookTitle": "Book",
+  "profileTitle": "Profile",
+
+  "welcomeBack": "Welcome, {name}!",
+  "@welcomeBack": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "homeSubtitle": "Here you can view upcoming appointments and manage your profile.",
+  "noAppointmentsToday": "You have no appointments scheduled for today.",
+
+  "editProfile": "Edit profile",
+  "language": "Language",
+  "logout": "Logout",
+  "notLoggedIn": "You are not logged in",
+  "login": "Login",
+
+  "cancel": "Cancel",
+  "save": "Save",
+
+  "logoutTitle": "Logout",
+  "logoutConfirm": "Are you sure you want to logout?",
+  "loggedOut": "Logged out successfully",
+  "goToLogin": "Go to login",
+  "username": "Username",
+  "profileUpdated": "Profile updated"
+}

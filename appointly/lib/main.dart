@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'language_provider.dart';
 import 'l10n/app_localizations.dart';
+//import 'package:supabase_flutter/supabase_flutter.dart' 
 
+//later to be placed the supabase
 void main() {
   runApp(
     ChangeNotifierProvider(

@@ -1,9 +1,33 @@
 {
-    "appTitle":"Termin-App",
-    "home":"Startseite",
-    "book":"Buchen",
-    "welcome":"Willkommen",
-    "chooseLanguage":"Sprache wählen",
-    "confirm":"Bestätigen",
-    "cancel":"Abbrechen"
+    "appTitle": "Appointly",
+    "homeTitle": "Startseite",
+    "bookTitle": "Buchen",
+    "profileTitle": "Profil",
+
+    "welcomeBack": "Willkommen zurück, {name}!",
+    "@welcomeBack": {
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+
+    "homeSubtitle": "Hier können Sie Ihre bevorstehenden Termine einsehen und Ihr Profil verwalten.",
+    "noAppointmentsToday": "Sie haben heute keine geplanten Termine.",
+
+    "editProfile": "Profil bearbeiten",
+    "language": "Sprache",
+    "logout": "Abmelden",
+    "notLoggedIn": "Nicht angemeldet",
+    "login": "Anmelden",
+
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+
+    "logoutTitle": "Abmelden",
+    "logoutConfirm": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+    "loggedOut": "Sie wurden erfolgreich abgemeldet",
+    "goToLogin": "Zum Login",
+    "username": "Benutzername",
+    "profileUpdated": "Profil aktualisiert"
+
 }

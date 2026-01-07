@@ -3,6 +3,7 @@ import 'package:appointly/app/home_page.dart';
 import 'package:appointly/app/welcome_page.dart';
 import 'package:appointly/features/profile/ui/profile_page.dart';
 import 'package:flutter/material.dart';
+import 'package:appointly/l10n/app_localizations.dart';
 
 class AuthController extends ChangeNotifier {
   bool _isLoggedIn = false;
@@ -21,13 +22,13 @@ class AuthController extends ChangeNotifier {
     return full.isEmpty ? (_username ?? "User") : full;
   }
 
+  String get username => (_username ?? "").trim();
   String get email => (_email ?? "").trim();
   DateTime? get dob => _dob;
 
   void login({required String username, required String password}) {
-    // Εδώ θα έμπαινε ο έλεγχος με το Firebase
     _isLoggedIn = true;
-    _username = username;
+    _username = username.trim();
     notifyListeners();
   }
 
@@ -40,11 +41,11 @@ class AuthController extends ChangeNotifier {
     required String password,
   }) {
     _isLoggedIn = true;
-    _name = name;
-    _surname = surname;
-    _email = email;
+    _name = name.trim();
+    _surname = surname.trim();
+    _email = email.trim();
     _dob = dob;
-    _username = username;
+    _username = username.trim();
     notifyListeners();
   }
 
@@ -55,6 +56,11 @@ class AuthController extends ChangeNotifier {
     _email = null;
     _dob = null;
     _username = null;
+    notifyListeners();
+  }
+
+  void updateUsername({required String username}) {
+    _username = username.trim();
     notifyListeners();
   }
 }
@@ -69,11 +75,9 @@ class AppRoot extends StatelessWidget {
     return AnimatedBuilder(
       animation: auth,
       builder: (context, _) {
-        // Αν δεν είναι συνδεδεμένος, δείξε την WelcomePage
         if (!auth.isLoggedIn) {
           return const WelcomePage();
         }
-        // Αν είναι συνδεδεμένος, δείξε το κυρίως περιβάλλον (Tabs)
         return const HomeShell();
       },
     );
@@ -94,23 +98,25 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: _pages[_index],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            label: "Αρχική",
+            icon: const Icon(Icons.home_outlined),
+            label: t.homeTitle,
           ),
           NavigationDestination(
-            icon: Icon(Icons.event_available_outlined),
-            label: "Ραντεβού",
+            icon: const Icon(Icons.event_available_outlined),
+            label: t.bookTitle,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: "Προφίλ",
+            icon: const Icon(Icons.person_outline),
+            label: t.profileTitle,
           ),
         ],
       ),
@@ -132,7 +138,10 @@ class AppScaffold extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
-            child: Padding(padding: const EdgeInsets.all(24.0), child: child),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: child,
+            ),
           ),
         ),
       ),

@@ -1,9 +1,33 @@
 {
-    "appTitle": "Aplicación de Citas",
-    "home": "Inicio",
-    "book": "Reservar",
-    "welcome": "Bienvenido",
-    "chooseLanguage": "Elegir Idioma",
-    "confirm": "Confirmar",
-    "cancel": "Cancelar"
+    "appTitle": "Appointly",
+    "homeTitle": "Inicio",
+    "bookTitle": "Reservar",
+    "profileTitle": "Perfil",
+
+    "welcomeBack": "¡Bienvenido, {name}!",
+    "@welcomeBack": {
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+
+    "homeSubtitle": "Aquí puedes ver las próximas citas y gestionar tu perfil.",
+    "noAppointmentsToday": "No hay citas programadas para hoy.",
+
+    "editProfile": "Editar perfil",
+    "language": "Idioma",
+    "logout": "Cerrar sesión",
+    "notLoggedIn": "No has iniciado sesión",
+    "login": "Iniciar sesión",
+
+    "cancel": "Cancelar",
+    "save": "Guardar",
+
+    "logoutTitle": "Cerrar sesión",
+    "logoutConfirm": "¿Estás seguro de que deseas cerrar sesión?",
+    "loggedOut": "Sesión cerrada correctamente",
+    "goToLogin": "Ir a iniciar sesión",
+    "username": "Nombre de usuario",
+    "profileUpdated": "Perfil actualizado"
+
 }

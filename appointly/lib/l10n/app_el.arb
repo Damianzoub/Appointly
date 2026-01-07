@@ -1,10 +1,33 @@
 {
-    "appTitle": "Εφαρμογή Κρατήσεων",
-    "home": "Αρχική",
-    "book": "Κράτηση",
-    "welcome": "Καλώς ήρθες",
-    "chooseLanguage": "Επιλέξτε Γλώσσα",
-    "confirm": "Επιβεβαίωση",
-    "cancel": "Ακύρωση"
-  }
-  
+  "appTitle": "Appointly",
+  "homeTitle": "Αρχική",
+  "bookTitle": "Κράτηση",
+  "profileTitle": "Προφίλ",
+
+  "welcomeBack": "Καλώς ήρθες, {name}!",
+  "@welcomeBack": {
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+
+  "homeSubtitle": "Εδώ μπορείτε να δείτε τα προσεχή ραντεβού σας και να διαχειριστείτε το προφίλ σας.",
+  "noAppointmentsToday": "Δεν έχετε προγραμματισμένα ραντεβού για σήμερα.",
+
+  "editProfile": "Επεξεργασία προφίλ",
+  "language": "Γλώσσα",
+  "logout": "Αποσύνδεση",
+  "notLoggedIn": "Δεν είστε συνδεδεμένος",
+  "login": "Σύνδεση",
+
+  "cancel": "Ακύρωση",
+  "save": "Αποθήκευση",
+
+  "logoutTitle": "Αποσύνδεση",
+  "logoutConfirm": "Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;",
+  "loggedOut": "Αποσυνδεθήκατε με επιτυχία",
+  "goToLogin": "Μετάβαση στη σύνδεση",
+  "username": "Όνομα χρήστη",
+  "profileUpdated": "Το προφίλ ενημερώθηκε"
+
+}

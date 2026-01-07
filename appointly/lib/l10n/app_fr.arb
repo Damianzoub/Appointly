@@ -1,9 +1,33 @@
 {
-    "appTitle": "Application de rendez-vous",
-    "home": "Accueil",
-    "book": "Réserver",
-    "welcome": "Bienvenue",
-    "chooseLanguage": "Choisir la langue",
-    "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "appTitle": "Appointly",
+    "homeTitle": "Accueil",
+    "bookTitle": "Réserver",
+    "profileTitle": "Profil",
+
+    "welcomeBack": "Bienvenue, {name}!",
+    "@welcomeBack": {
+        "placeholders": {
+            "name": { "type": "String" }
+        }
+    },
+
+    "homeSubtitle": "Ici, vous pouvez voir les rendez-vous à venir et gérer votre profil.",
+    "noAppointmentsToday": "Aucun rendez-vous prévu pour aujourd'hui.",
+
+    "editProfile": "Modifier le profil",
+    "language": "Langue",
+    "logout": "Se déconnecter",
+    "notLoggedIn": "Vous n'êtes pas connecté",
+    "login": "Se connecter",
+
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+
+    "logoutTitle": "Déconnexion",
+    "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "loggedOut": "Déconnecté avec succès",
+    "goToLogin": "Aller à la connexion",
+    "username": "Nom d’utilisateur",
+    "profileUpdated": "Profil mis à jour"
+
 }

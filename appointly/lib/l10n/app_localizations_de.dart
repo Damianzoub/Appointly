@@ -9,23 +9,64 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appTitle => 'Termin-App';
+  String get appTitle => 'Appointly';
 
   @override
-  String get home => 'Startseite';
+  String get homeTitle => 'Startseite';
 
   @override
-  String get book => 'Buchen';
+  String get bookTitle => 'Buchen';
 
   @override
-  String get welcome => 'Willkommen';
+  String get profileTitle => 'Profil';
 
   @override
-  String get chooseLanguage => 'Sprache wählen';
+  String welcomeBack(String name) {
+    return 'Willkommen zurück, $name!';
+  }
 
   @override
-  String get confirm => 'Bestätigen';
+  String get homeSubtitle => 'Hier können Sie Ihre bevorstehenden Termine einsehen und Ihr Profil verwalten.';
+
+  @override
+  String get noAppointmentsToday => 'Sie haben heute keine geplanten Termine.';
+
+  @override
+  String get editProfile => 'Profil bearbeiten';
+
+  @override
+  String get language => 'Sprache';
+
+  @override
+  String get logout => 'Abmelden';
+
+  @override
+  String get notLoggedIn => 'Nicht angemeldet';
+
+  @override
+  String get login => 'Anmelden';
 
   @override
   String get cancel => 'Abbrechen';
+
+  @override
+  String get save => 'Speichern';
+
+  @override
+  String get logoutTitle => 'Abmelden';
+
+  @override
+  String get logoutConfirm => 'Sind Sie sicher, dass Sie sich abmelden möchten?';
+
+  @override
+  String get loggedOut => 'Sie wurden erfolgreich abgemeldet';
+
+  @override
+  String get goToLogin => 'Zum Login';
+
+  @override
+  String get username => 'Benutzername';
+
+  @override
+  String get profileUpdated => 'Profil aktualisiert';
 }
