@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserProfile {
   final String uid;
   final String firstname;
@@ -18,34 +16,36 @@ class UserProfile {
     this.dateOfBirth,
     required this.phoneNumber,
     required this.createdAt,
-    required this.updatedAt
+    required this.updatedAt,
   });
 
-  factory UserProfile.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  // Αντικατάσταση του fromFirestore με fromMap
+  factory UserProfile.fromMap(Map<String, dynamic> data) {
     return UserProfile(
-      uid: doc.id,
+      uid: data['id'] ?? '', // Στη Supabase συνήθως η στήλη λέγεται 'id'
       firstname: data['firstname'] ?? '',
       lastname: data['lastname'] ?? '',
       email: data['email'] ?? '',
       dateOfBirth: data['date_of_birth'] != null
-          ? (data['date_of_birth'] as Timestamp).toDate()
+          ? DateTime.parse(data['date_of_birth'])
           : null,
       phoneNumber: data['phone_number'] ?? '',
-      createdAt: (data['created_at'] as Timestamp).toDate(),
-      updatedAt: (data['updated_at'] as Timestamp).toDate()
+      createdAt: DateTime.parse(data['created_at']),
+      updatedAt: DateTime.parse(data['updated_at']),
     );
   }
 
-  Map<String,dynamic> toFirestore(){
+  // Αντικατάσταση του toFirestore με toMap
+  Map<String, dynamic> toMap() {
     return {
-      "email":email,
-      "firstname":firstname,
-      "lastname":lastname,
-      "date_of_birth":dateOfBirth != null ? Timestamp.fromDate(dateOfBirth!) : null,
-      "phone_number":phoneNumber,
-      "created_at":Timestamp.fromDate(createdAt),
-      "updated_at":Timestamp.fromDate(updatedAt),
+      // Το 'id' συνήθως δημιουργείται αυτόματα από τη βάση (UUID)
+      "email": email,
+      "firstname": firstname,
+      "lastname": lastname,
+      "date_of_birth": dateOfBirth?.toIso8601String(),
+      "phone_number": phoneNumber,
+      "created_at": createdAt.toIso8601String(),
+      "updated_at": updatedAt.toIso8601String(),
     };
   }
 }

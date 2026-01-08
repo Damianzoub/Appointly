@@ -13,35 +13,47 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formkey = GlobalKey<FormState>();
-  final _usernameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameCtrl.dispose();
+    _emailCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formkey.currentState!.validate()) return;
 
-    // Κανονική σύνδεση
-    auth.login(
-      username: _usernameCtrl.text.trim(),
-      password: _passwordCtrl.text.trim(),
-    );
+    setState(() => _isLoading = true);
 
-    // Επιστροφή (το AppRoot θα δείξει το Home πλέον)
-    Navigator.pop(context);
+    try {
+      await auth.login(
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Επιτυχής σύνδεση!"),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Επιτυχής σύνδεση!"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Σφάλμα σύνδεσης: $e")));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -61,13 +73,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
-                  controller: _usernameCtrl,
+                  controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    labelText: "Όνομα χρήστη",
-                    prefixIcon: Icon(Icons.person_outline),
+                    labelText: "Email",
+                    prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (v) =>
-                      (v ?? "").isEmpty ? "Εισάγετε όνομα χρήστη" : null,
+                  validator: (v) => (v ?? "").isEmpty ? "Εισάγετε email" : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -102,8 +114,10 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _submit,
-                    child: const Text("Είσοδος"),
+                    onPressed: _isLoading ? null : _submit,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Είσοδος"),
                   ),
                 ),
                 const SizedBox(height: 16),

@@ -1,7 +1,7 @@
 import 'package:appointly/app.dart';
 import 'package:appointly/app/login_page.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Προαιρετικό για ωραίο φορμάρισμα ημερομηνίας
+import 'package:intl/intl.dart';
 
 class SignupPage extends StatefulWidget {
   static const route = "/signup";
@@ -22,6 +22,7 @@ class _SignupPageState extends State<SignupPage> {
   DateTime? _dob;
   bool _obscure = true;
   bool _confirmObscure = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -42,21 +43,13 @@ class _SignupPageState extends State<SignupPage> {
       initialDate: initial,
       firstDate: DateTime(1900),
       lastDate: now,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null) {
       setState(() => _dob = picked);
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_dob == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,24 +57,44 @@ class _SignupPageState extends State<SignupPage> {
       );
       return;
     }
-    // Εδώ προσθέτεις τη λογική για το auth.signup
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Account created successfully!")),
-    );
-    Navigator.pushReplacementNamed(context, LoginPage.route);
+
+    setState(() => _isLoading = true);
+
+    try {
+      await auth.signup(
+        name: _nameCtrl.text.trim(),
+        surname: _surnameCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+        dob: _dob!,
+        username: _usernameCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Account created! Please check your email."),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacementNamed(context, LoginPage.route);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Σφάλμα: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   InputDecoration _inputStyle(String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, size: 22),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    );
+    return InputDecoration(labelText: label, prefixIcon: Icon(icon, size: 22));
   }
 
   @override
@@ -91,189 +104,156 @@ class _SignupPageState extends State<SignupPage> {
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 450),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    "Join us to start booking appointments",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 32),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Join us to start booking appointments",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 32),
 
-                  // Row για Name & Surname
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _nameCtrl,
-                          decoration: _inputStyle(
-                            "First Name",
-                            Icons.person_outline,
-                          ),
-                          validator: (v) =>
-                              (v ?? '').isEmpty ? "Required" : null,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _nameCtrl,
+                        decoration: _inputStyle(
+                          "First Name",
+                          Icons.person_outline,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _surnameCtrl,
-                          decoration: _inputStyle(
-                            "Last Name",
-                            Icons.person_outline,
-                          ),
-                          validator: (v) =>
-                              (v ?? '').isEmpty ? "Required" : null,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _usernameCtrl,
-                    decoration: _inputStyle("Username", Icons.alternate_email),
-                    validator: (v) => (v ?? '').isEmpty ? "Required" : null,
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _emailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: _inputStyle(
-                      "Email Address",
-                      Icons.email_outlined,
-                    ),
-                    validator: (v) =>
-                        !(v ?? '').contains('@') ? "Invalid email" : null,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Date of Birth Picker
-                  InkWell(
-                    onTap: _pickDob,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_outlined,
-                            color: Colors.grey,
-                            size: 22,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _dob == null
-                                ? "Date of Birth"
-                                : DateFormat('dd/MM/yyyy').format(_dob!),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: _dob == null
-                                  ? Colors.grey[600]
-                                  : Colors.black,
-                            ),
-                          ),
-                        ],
+                        validator: (v) => (v ?? '').isEmpty ? "Required" : null,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _passwordCtrl,
-                    obscureText: _obscure,
-                    decoration: _inputStyle("Password", Icons.lock_outline)
-                        .copyWith(
-                          suffixIcon: IconButton(
-                            onPressed: () =>
-                                setState(() => _obscure = !_obscure),
-                            icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                          ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _surnameCtrl,
+                        decoration: _inputStyle(
+                          "Last Name",
+                          Icons.person_outline,
                         ),
-                    validator: (v) =>
-                        (v ?? '').length < 6 ? "Min 6 characters" : null,
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _confirmPasswordCtrl,
-                    obscureText: _confirmObscure,
-                    decoration:
-                        _inputStyle(
-                          "Confirm Password",
-                          Icons.lock_reset,
-                        ).copyWith(
-                          suffixIcon: IconButton(
-                            onPressed: () => setState(
-                              () => _confirmObscure = !_confirmObscure,
-                            ),
-                            icon: Icon(
-                              _confirmObscure
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                          ),
-                        ),
-                    validator: (v) =>
-                        v != _passwordCtrl.text ? "Passwords match fail" : null,
-                  ),
-                  const SizedBox(height: 32),
-
-                  SizedBox(
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: _submit,
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Create Account",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        validator: (v) => (v ?? '').isEmpty ? "Required" : null,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account?"),
-                      TextButton(
-                        onPressed: () => Navigator.pushReplacementNamed(
-                          context,
-                          LoginPage.route,
+                TextFormField(
+                  controller: _usernameCtrl,
+                  decoration: _inputStyle("Username", Icons.alternate_email),
+                  validator: (v) => (v ?? '').isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _inputStyle(
+                    "Email Address",
+                    Icons.email_outlined,
+                  ),
+                  validator: (v) =>
+                      !(v ?? '').contains('@') ? "Invalid email" : null,
+                ),
+                const SizedBox(height: 16),
+
+                InkWell(
+                  onTap: _pickDob,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          color: Colors.grey,
+                          size: 22,
                         ),
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        const SizedBox(width: 12),
+                        Text(
+                          _dob == null
+                              ? "Date of Birth"
+                              : DateFormat('dd/MM/yyyy').format(_dob!),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _dob == null
+                                ? Colors.grey[600]
+                                : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _passwordCtrl,
+                  obscureText: _obscure,
+                  decoration: _inputStyle("Password", Icons.lock_outline)
+                      .copyWith(
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                          ),
                         ),
                       ),
-                    ],
+                  validator: (v) =>
+                      (v ?? '').length < 6 ? "Min 6 characters" : null,
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _confirmPasswordCtrl,
+                  obscureText: _confirmObscure,
+                  decoration: _inputStyle("Confirm Password", Icons.lock_reset)
+                      .copyWith(
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                            () => _confirmObscure = !_confirmObscure,
+                          ),
+                          icon: Icon(
+                            _confirmObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                        ),
+                      ),
+                  validator: (v) =>
+                      v != _passwordCtrl.text ? "Passwords don't match" : null,
+                ),
+                const SizedBox(height: 32),
+
+                SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _submit,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text("Create Account"),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
