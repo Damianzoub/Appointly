@@ -28,6 +28,15 @@
   "loggedOut": "Αποσυνδεθήκατε με επιτυχία",
   "goToLogin": "Μετάβαση στη σύνδεση",
   "username": "Όνομα χρήστη",
-  "profileUpdated": "Το προφίλ ενημερώθηκε"
+  "profileUpdated": "Το προφίλ ενημερώθηκε",
+
+
+  "bookPlaceholder": "Επιλογές Κράτησης",
+  "step1Title": "Βήμα 1",
+  "step1Subtitle": "Επιλογή Κατηγορίας",
+  "step2Title": "Βήμα 2",
+  "step2Subtitle": "Επιλογή Παρόχου",
+  "step3Title": "Βήμα 3",
+  "step3Subtitle": "Επιλογή Ημερομηνίας & Ώρας"
 
 }

@@ -28,6 +28,14 @@
     "loggedOut": "Déconnecté avec succès",
     "goToLogin": "Aller à la connexion",
     "username": "Nom d’utilisateur",
-    "profileUpdated": "Profil mis à jour"
+    "profileUpdated": "Profil mis à jour",
+
+    "bookPlaceholder": "Options de réservation",
+    "step1Title": "Étape 1",
+    "step1Subtitle": "Choisir une catégorie",
+    "step2Title": "Étape 2",
+    "step2Subtitle": "Choisir un prestataire",
+    "step3Title": "Étape 3",
+    "step3Subtitle": "Choisir date et heure"
 
 }

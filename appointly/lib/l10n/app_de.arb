@@ -28,6 +28,15 @@
     "loggedOut": "Sie wurden erfolgreich abgemeldet",
     "goToLogin": "Zum Login",
     "username": "Benutzername",
-    "profileUpdated": "Profil aktualisiert"
+    "profileUpdated": "Profil aktualisiert",
+
+
+    "bookPlaceholder": "Buchungsoptionen",
+    "step1Title": "Schritt 1",
+    "step1Subtitle": "Kategorie wählen",
+    "step2Title": "Schritt 2",
+    "step2Subtitle": "Anbieter wählen",
+    "step3Title": "Schritt 3",
+    "step3Subtitle": "Datum & Uhrzeit wählen"
 
 }

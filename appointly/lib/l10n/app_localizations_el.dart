@@ -69,4 +69,25 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get profileUpdated => 'Το προφίλ ενημερώθηκε';
+
+  @override
+  String get bookPlaceholder => 'Επιλογές Κράτησης';
+
+  @override
+  String get step1Title => 'Βήμα 1';
+
+  @override
+  String get step1Subtitle => 'Επιλογή Κατηγορίας';
+
+  @override
+  String get step2Title => 'Βήμα 2';
+
+  @override
+  String get step2Subtitle => 'Επιλογή Παρόχου';
+
+  @override
+  String get step3Title => 'Βήμα 3';
+
+  @override
+  String get step3Subtitle => 'Επιλογή Ημερομηνίας & Ώρας';
 }

@@ -28,5 +28,13 @@
   "loggedOut": "Logged out successfully",
   "goToLogin": "Go to login",
   "username": "Username",
-  "profileUpdated": "Profile updated"
+  "profileUpdated": "Profile updated",
+
+  "bookPlaceholder": "Booking Options",
+  "step1Title": "Step 1",
+  "step1Subtitle": "Choose Category",
+  "step2Title": "Step 2",
+  "step2Subtitle": "Choose Provider",
+  "step3Title": "Step 3",
+  "step3Subtitle": "Pick Date & Time"
 }

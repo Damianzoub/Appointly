@@ -220,6 +220,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile updated'**
   String get profileUpdated;
+
+  /// No description provided for @bookPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Options'**
+  String get bookPlaceholder;
+
+  /// No description provided for @step1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1'**
+  String get step1Title;
+
+  /// No description provided for @step1Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Category'**
+  String get step1Subtitle;
+
+  /// No description provided for @step2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2'**
+  String get step2Title;
+
+  /// No description provided for @step2Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Provider'**
+  String get step2Subtitle;
+
+  /// No description provided for @step3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 3'**
+  String get step3Title;
+
+  /// No description provided for @step3Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Date & Time'**
+  String get step3Subtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

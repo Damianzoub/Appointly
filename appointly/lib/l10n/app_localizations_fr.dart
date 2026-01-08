@@ -69,4 +69,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileUpdated => 'Profil mis à jour';
+
+  @override
+  String get bookPlaceholder => 'Options de réservation';
+
+  @override
+  String get step1Title => 'Étape 1';
+
+  @override
+  String get step1Subtitle => 'Choisir une catégorie';
+
+  @override
+  String get step2Title => 'Étape 2';
+
+  @override
+  String get step2Subtitle => 'Choisir un prestataire';
+
+  @override
+  String get step3Title => 'Étape 3';
+
+  @override
+  String get step3Subtitle => 'Choisir date et heure';
 }

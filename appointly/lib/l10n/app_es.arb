@@ -28,6 +28,15 @@
     "loggedOut": "Sesión cerrada correctamente",
     "goToLogin": "Ir a iniciar sesión",
     "username": "Nombre de usuario",
-    "profileUpdated": "Perfil actualizado"
+    "profileUpdated": "Perfil actualizado",
+
+
+    "bookPlaceholder": "Opciones de reserva",
+    "step1Title": "Paso 1",
+    "step1Subtitle": "Elegir categoría",
+    "step2Title": "Paso 2",
+    "step2Subtitle": "Elegir proveedor",
+    "step3Title": "Paso 3",
+    "step3Subtitle": "Seleccionar fecha y hora"
 
 }

@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.profileTitle)),
+      appBar: AppBar(title: Text(t.profileTitle), centerTitle: true),
       body: AnimatedBuilder(
         animation: auth,
         builder: (context, _) {
@@ -126,9 +126,9 @@ class ProfilePage extends StatelessWidget {
               auth.updateUsername(username: newUsername);
 
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(t.profileUpdated)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(t.profileUpdated)));
             },
             child: Text(t.save),
           ),
@@ -223,14 +223,11 @@ class ProfilePage extends StatelessWidget {
             onPressed: () {
               Navigator.pop(ctx);
               auth.logout();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(t.loggedOut)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(t.loggedOut)));
             },
-            child: Text(
-              t.logout,
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: Text(t.logout, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

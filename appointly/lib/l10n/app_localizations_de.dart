@@ -69,4 +69,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profileUpdated => 'Profil aktualisiert';
+
+  @override
+  String get bookPlaceholder => 'Buchungsoptionen';
+
+  @override
+  String get step1Title => 'Schritt 1';
+
+  @override
+  String get step1Subtitle => 'Kategorie wählen';
+
+  @override
+  String get step2Title => 'Schritt 2';
+
+  @override
+  String get step2Subtitle => 'Anbieter wählen';
+
+  @override
+  String get step3Title => 'Schritt 3';
+
+  @override
+  String get step3Subtitle => 'Datum & Uhrzeit wählen';
 }
