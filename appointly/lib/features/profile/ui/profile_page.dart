@@ -49,7 +49,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final langProvider = context.watch<LanguageProvider>();
     final t = AppLocalizations.of(context)!;
     final user = _supabase.auth.currentUser;
-
     return Scaffold(
       appBar: AppBar(title: Text(t.profileTitle), centerTitle: true),
       body: _isLoading
