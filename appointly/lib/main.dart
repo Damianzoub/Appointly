@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // [Βήμα 1: Ξεκλειδώνουμε το import]
 
 import 'app.dart';
 import 'language_provider.dart';
 import 'l10n/app_localizations.dart';
-//import 'package:supabase_flutter/supabase_flutter.dart' 
 
-//later to be placed the supabase
-void main() {
+// [Βήμα 2: Μετατροπή της main σε async]
+Future<void> main() async {
+  // [Βήμα 3: Εξασφάλιση ότι τα bindings είναι έτοιμα]
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // [Βήμα 4: Αρχικοποίηση της Supabase]
+  await Supabase.initialize(
+    url:
+        'https://hovaggbxxhsviudnejjc.supabase.co', // Αντικατάστησε με το δικό σου URL
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmFnZ2J4eGhzdml1ZG5lampjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MjU1ODEsImV4cCI6MjA4MzMwMTU4MX0.zZpw8cK3lhsI3__FXZZs8TPQy60H4Zk83x2UaZaLosA',
+    // Αντικατάστησε με το δικό σου Key
+  );
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => LanguageProvider(),
@@ -38,18 +50,14 @@ class MainApp extends StatelessWidget {
       ],
       locale: localeProvider.locale,
 
-      // MODERN THEME - ΧΩΡΙΣ CARDTHEME
       theme: ThemeData(
         useMaterial3: true,
-        // Ορίζουμε το ColorScheme ρητά για να ελέγξουμε το λευκό χρώμα των επιφανειών
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.indigo,
-          surface: Colors.white, // Όλες οι κάρτες και τα panels θα είναι λευκά
-          surfaceTint:
-              Colors.white, // Αφαιρεί την "μοβ" απόχρωση του Material 3
+          surface: Colors.white,
+          surfaceTint: Colors.white,
         ),
 
-        // Στυλ για τα TextFields (Input)
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey[50],
@@ -67,7 +75,6 @@ class MainApp extends StatelessWidget {
           ),
         ),
 
-        // Στυλ για τα Κουμπιά
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(52),
@@ -77,7 +84,6 @@ class MainApp extends StatelessWidget {
           ),
         ),
 
-        // Στυλ για το AppBar
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: 0,
@@ -91,14 +97,12 @@ class MainApp extends StatelessWidget {
           ),
         ),
 
-        // Στυλ για το Bottom Navigation
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: Colors.white,
           indicatorColor: Colors.indigo.withOpacity(0.1),
           height: 70,
         ),
       ),
-
       home: const AppRoot(),
     );
   }

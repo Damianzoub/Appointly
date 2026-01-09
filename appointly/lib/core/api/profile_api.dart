@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'supabase_client.dart';
+import '../supabase/supabase_client.dart';
 import 'api_exceptions.dart';
 
 class ProfileApi {

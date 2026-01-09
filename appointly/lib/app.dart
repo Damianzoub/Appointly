@@ -4,63 +4,77 @@ import 'package:appointly/app/welcome_page.dart';
 import 'package:appointly/features/profile/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:appointly/l10n/app_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthController extends ChangeNotifier {
-  bool _isLoggedIn = false;
-  String? _name;
-  String? _surname;
-  String? _email;
-  DateTime? _dob;
-  String? _username;
+  final _supabase = Supabase.instance.client;
 
-  bool get isLoggedIn => _isLoggedIn;
+  bool get isLoggedIn => _supabase.auth.currentSession != null;
 
   String get displayName {
-    final n = (_name ?? "").trim();
-    final s = (_surname ?? "").trim();
+    final user = _supabase.auth.currentUser;
+    final metadata = user?.userMetadata;
+    if (metadata == null) return "User";
+
+    final n = (metadata['first_name'] ?? "").toString().trim();
+    final s = (metadata['last_name'] ?? "").toString().trim();
     final full = ("$n $s").trim();
-    return full.isEmpty ? (_username ?? "User") : full;
+    return full.isEmpty ? (metadata['username'] ?? "User") : full;
   }
 
-  String get username => (_username ?? "").trim();
-  String get email => (_email ?? "").trim();
-  DateTime? get dob => _dob;
+  String get email => _supabase.auth.currentUser?.email ?? "";
 
-  void login({required String username, required String password}) {
-    _isLoggedIn = true;
-    _username = username.trim();
+  Future<void> login({required String email, required String password}) async {
+    await _supabase.auth.signInWithPassword(email: email, password: password);
     notifyListeners();
   }
 
-  void signup({
+  Future<void> signup({
     required String name,
     required String surname,
     required String email,
     required DateTime dob,
     required String username,
     required String password,
-  }) {
-    _isLoggedIn = true;
-    _name = name.trim();
-    _surname = surname.trim();
-    _email = email.trim();
-    _dob = dob;
-    _username = username.trim();
-    notifyListeners();
+  }) async {
+    try {
+      // 1. Signup στο auth
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'first_name': name,
+          'last_name': surname,
+          'username': username,
+          'dob': dob.toIso8601String(),
+        },
+      );
+
+      // 2. Αν το signup πέτυχε, δημιούργησε το profile
+      if (response.user != null) {
+        try {
+          await _supabase.from('profiles').insert({
+            'id': response.user!.id,
+            'username': username,
+            'first_name': name,
+            'last_name': surname,
+            'dob': dob.toIso8601String().split('T')[0], // Μόνο η ημερομηνία
+          });
+        } catch (profileError) {
+          // Αν αποτύχει το profile insert, διέγραψε τον user
+          print('Profile creation failed: $profileError');
+          // Μπορείς να διαγράψεις τον user εδώ αν θέλεις
+        }
+      }
+
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  void logout() {
-    _isLoggedIn = false;
-    _name = null;
-    _surname = null;
-    _email = null;
-    _dob = null;
-    _username = null;
-    notifyListeners();
-  }
-
-  void updateUsername({required String username}) {
-    _username = username.trim();
+  void logout() async {
+    await _supabase.auth.signOut();
     notifyListeners();
   }
 }
@@ -93,7 +107,6 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
-
   final _pages = const [HomePage(), BookPage(), ProfilePage()];
 
   @override
@@ -138,10 +151,7 @@ class AppScaffold extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: child,
-            ),
+            child: Padding(padding: const EdgeInsets.all(24.0), child: child),
           ),
         ),
       ),
