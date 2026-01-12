@@ -1,24 +1,21 @@
+import 'package:appointly/app/login_page.dart';
+import 'package:appointly/app/signup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // [Βήμα 1: Ξεκλειδώνουμε το import]
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'language_provider.dart';
 import 'l10n/app_localizations.dart';
 
-// [Βήμα 2: Μετατροπή της main σε async]
 Future<void> main() async {
-  // [Βήμα 3: Εξασφάλιση ότι τα bindings είναι έτοιμα]
   WidgetsFlutterBinding.ensureInitialized();
 
-  // [Βήμα 4: Αρχικοποίηση της Supabase]
   await Supabase.initialize(
-    url:
-        'https://hovaggbxxhsviudnejjc.supabase.co', // Αντικατάστησε με το δικό σου URL
+    url: 'https://hovaggbxxhsviudnejjc.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdmFnZ2J4eGhzdml1ZG5lampjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MjU1ODEsImV4cCI6MjA4MzMwMTU4MX0.zZpw8cK3lhsI3__FXZZs8TPQy60H4Zk83x2UaZaLosA',
-    // Αντικατάστησε με το δικό σου Key
   );
 
   runApp(
@@ -49,6 +46,15 @@ class MainApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       locale: localeProvider.locale,
+
+      // ΔΙΟΡΘΩΣΗ: Χρησιμοποιούμε ΜΟΝΟ το initialRoute και το routes.
+      // Αφαιρέθηκε το property 'home' για να μην υπάρχει σύγκρουση.
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AppRoot(),
+        LoginPage.route: (context) => const LoginPage(),
+        SignupPage.route: (context) => const SignupPage(),
+      },
 
       theme: ThemeData(
         useMaterial3: true,
@@ -103,7 +109,6 @@ class MainApp extends StatelessWidget {
           height: 70,
         ),
       ),
-      home: const AppRoot(),
     );
   }
 }
