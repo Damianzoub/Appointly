@@ -16,12 +16,75 @@ class _ProfilePageState extends State<ProfilePage> {
   final _supabase = Supabase.instance.client;
   Map<String, dynamic>? _profileData;
   bool _isLoading = true;
-
+  
   @override
   void initState() {
     super.initState();
     _fetchProfile();
   }
+
+  Future<void> _showEditUsernameDialog(BuildContext context) async{
+    final t = AppLocalizations.of(context)!;
+    final user = _supabase.auth.currentUser;
+    if(user ==null) return;
+
+    final ctrl = TextEditingController(
+      text: (_profileData?["username"] ?? "").toString(),
+    );
+
+    await showDialog(context: context, builder: (ctx)=>
+    AlertDialog(
+      title: Text(t.username),
+      content: TextField(
+        controller: ctrl,
+        decoration: InputDecoration(
+          labelText: t.username,
+          border: const OutlineInputBorder()
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: ()=> Navigator.pop(ctx), child: Text(t.cancel)),
+        TextButton(onPressed: () async{
+          final newUsername = ctrl.text.trim();
+          if (newUsername.isEmpty) return;
+
+          try{
+            final exists = await _supabase
+            .from("profiles")
+            .select('id')
+            .eq("username",newUsername)
+            .neq("id",user.id)
+            .maybeSingle();
+
+            if (exists !=null){
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Username already exists"))
+              );
+              return;
+            }
+
+            await _supabase
+            .from("profiles")
+            .update({"username":newUsername})
+            .eq('id',user.id);
+            
+            if(!mounted) return;
+            Navigator.pop(ctx);
+
+            await _fetchProfile();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(t.profileUpdated))
+            );
+          }catch(e){
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("update failed: $e"))
+            );
+          }
+
+        }, child: Text(t.save))
+      ],
+    ));
+  } 
 
   Future<void> _fetchProfile() async {
     try {
@@ -56,6 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final String firstName = _profileData?['first_name'] ?? "";
     final String lastName = _profileData?['last_name'] ?? "";
+    final String username  = _profileData?['username']??"";
     String fullName = "$firstName $lastName".trim();
 
     if (fullName.isEmpty) {
@@ -97,14 +161,25 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 32),
                 const Divider(),
-
+                Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.edit, color: Colors.indigo),
+                        title: Text(t.username),
+                        subtitle: Text(username.isEmpty ? "-" : username),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _showEditUsernameDialog(context),
+                      ),
+                    ),
+                const SizedBox(height: 12),
                 // ΔΙΟΡΘΩΜΕΝΟ ListTile: Χρήση σταθερού κειμένου για να μην κρασάρει
-                ListTile(
+                Card(
+                  child:ListTile(
                   leading: const Icon(Icons.language, color: Colors.indigo),
-                  title: const Text("Αλλαγή Γλώσσας / Change Language"),
+                  title:  Text(t.language),
                   subtitle: Text(_getCurrentLanguageName(context)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _showLanguageSheet(context),
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -117,8 +192,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      "Αποσύνδεση", // Σταθερό κείμενο για ασφάλεια
+                    title: Text(
+                      t.logout, // Σταθερό κείμενο για ασφάλεια
                       style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
