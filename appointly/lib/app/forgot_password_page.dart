@@ -1,6 +1,5 @@
-import 'package:appointly/app.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Αλλαγή: Firebase αντί για Supabase
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   static const route = "/forgot";
@@ -12,6 +11,7 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // Προσθήκη FormKey για validation
   bool _isLoading = false;
   bool _emailSent = false;
 
@@ -21,25 +21,44 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
+  // Μέθοδος εμφάνισης μηνυμάτων (SnackBar)
+  void _showMsg(String msg, {bool isError = true}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _handleResetPassword() async {
+    // 1. Έλεγχος εγκυρότητας φόρμας
+    if (!_formKey.currentState!.validate()) return;
+
     final email = _emailController.text.trim();
-
-    if (email.isEmpty) {
-      _showMsg("Παρακαλώ εισάγετε το email σας");
-      return;
-    }
-
     setState(() => _isLoading = true);
 
     try {
-      // Χρήση Firebase Auth για αποστολή email επαναφοράς
+      // 2. Αποστολή email μέσω Firebase
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-      setState(() => _emailSent = true);
-      _showMsg("Ο σύνδεσμος επαναφοράς στάλθηκε στο email σας!");
+      if (mounted) {
+        setState(() => _emailSent = true);
+        _showMsg("Ο σύνδεσμος επαναφοράς στάλθηκε!", isError: false);
+      }
     } on FirebaseAuthException catch (e) {
-      // Διαχείριση λαθών Firebase (π.χ. λάθος format email)
-      _showMsg(e.message ?? "Παρουσιάστηκε σφάλμα");
+      // 3. Εξειδικευμένη διαχείριση σφαλμάτων Firebase
+      String errorMessage = "Παρουσιάστηκε σφάλμα";
+      if (e.code == 'user-not-found') {
+        errorMessage = "Δεν βρέθηκε χρήστης με αυτό το email.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "Η διεύθυνση email δεν είναι έγκυρη.";
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = "Πολλά αιτήματα. Δοκιμάστε ξανά αργότερα.";
+      }
+      _showMsg(errorMessage);
     } catch (e) {
       _showMsg("Κάτι πήγε στραβά. Δοκιμάστε ξανά.");
     } finally {
@@ -47,44 +66,44 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
-  void _showMsg(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Επαναφορά Κωδικού")),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            shrinkWrap: true,
+      appBar: AppBar(title: const Text("Επαναφορά Κωδικού"), centerTitle: true),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey, // Σύνδεση με το FormKey
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (!_emailSent) ...[
+                const Icon(Icons.lock_reset, size: 80, color: Colors.indigo),
+                const SizedBox(height: 24),
                 const Text(
-                  "Ξεχάσατε τον κωδικό σας;",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  "Εισάγετε το email σας για να σας στείλουμε έναν σύνδεσμο επαναφοράς του κωδικού σας.",
                   textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Εισάγετε το email σας και θα σας στείλουμε έναν σύνδεσμο για να ορίσετε νέο κωδικό πρόσβασης.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
-                TextField(
+                TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: "Email",
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
+                  // Validation για κενό πεδίο και σωστό format
+                  validator: (value) {
+                    if (value == null || value.isEmpty)
+                      return "Το email είναι απαραίτητο";
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
+                      return "Εισάγετε ένα έγκυρο email";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -105,21 +124,25 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
               ] else ...[
+                // UI Επιτυχίας
                 const Icon(
                   Icons.check_circle_outline,
                   color: Colors.green,
-                  size: 60,
+                  size: 80,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 const Text(
                   "Ελέγξτε τα εισερχόμενά σας!\nΑκολουθήστε τον σύνδεσμο στο email για να αλλάξετε τον κωδικό σας.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
-                const SizedBox(height: 32),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Επιστροφή στη σύνδεση"),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Επιστροφή στη σύνδεση"),
+                  ),
                 ),
               ],
               if (!_emailSent)

@@ -1,5 +1,4 @@
 import 'package:appointly/app.dart';
-import 'package:appointly/app/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';

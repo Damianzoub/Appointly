@@ -70,6 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
 
+    // Προσθήκη προ-συμπλήρωσης για Όνομα και Επίθετο
     final nameCtrl = TextEditingController(
       text: _profileData?['firstName'] ?? _profileData?['name'] ?? "",
     );
@@ -82,10 +83,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     DateTime? selectedDob;
     var rawDob = _profileData?['dob'];
-    if (rawDob is Timestamp)
+    if (rawDob is Timestamp) {
       selectedDob = rawDob.toDate();
-    else if (rawDob is String)
+    } else if (rawDob is String) {
       selectedDob = DateTime.tryParse(rawDob);
+    }
 
     await showDialog(
       context: context,
@@ -144,8 +146,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       firstDate: DateTime(1920),
                       lastDate: DateTime.now(),
                     );
-                    if (picked != null)
+                    if (picked != null) {
                       setDialogState(() => selectedDob = picked);
+                    }
                   },
                 ),
               ],
@@ -166,9 +169,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       ? Timestamp.fromDate(selectedDob!)
                       : rawDob,
                 }, SetOptions(merge: true));
+
                 await user.updateDisplayName(
                   "${nameCtrl.text.trim()} ${lastNameCtrl.text.trim()}",
                 );
+
                 if (mounted) Navigator.pop(ctx);
                 _fetchProfile();
               },
@@ -216,29 +221,24 @@ class _ProfilePageState extends State<ProfilePage> {
           : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               children: [
-                // Header Profile Section
                 Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.indigo.withOpacity(0.2),
-                            width: 4,
-                          ),
-                        ),
-                        child: const CircleAvatar(
-                          radius: 55,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 70,
-                            color: Colors.indigo,
-                          ),
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.indigo.withOpacity(0.2),
+                        width: 4,
                       ),
-                    ],
+                    ),
+                    child: const CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person_rounded,
+                        size: 70,
+                        color: Colors.indigo,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
