@@ -1,102 +1,96 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase/supabase_client.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Αλλαγή σε Firestore
+import 'package:firebase_auth/firebase_auth.dart';
 import 'api_exceptions.dart';
 
 class ProfileApi {
-  final SupabaseClient _sb = SB.client;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-
-  // Create User
+  // Δημιουργία Προφίλ στο Firestore
   Future<void> createProfile({
     required String userID,
     required String username,
     required String name,
     required String surname,
-    DateTime? dob
-  }) async{
-    try{
-      await _sb.from("profile").insert({
-        'id':userID,
-        'username':username,
-        'name':name,
-        'surname':surname,
-        'dob':dob?.toIso8601String().substring(0,10)
+    DateTime? dob,
+  }) async {
+    try {
+      await _db.collection("users").doc(userID).set({
+        'username': username,
+        'first_name': name,
+        'last_name': surname,
+        'dob': dob?.toIso8601String(),
+        'created_at': FieldValue.serverTimestamp(),
       });
-    }catch(_){
-      throw ApiException("Failed to create profile");
+    } catch (e) {
+      throw ApiException("Failed to create profile: $e");
     }
   }
 
-
-  // Update User
+  // Ενημέρωση Προφίλ
   Future<void> updateMyProfile({
     String? name,
     String? surname,
     String? username,
-    String? password,
     String? email,
-  }) async{
-    final uid = _sb.auth.currentUser?.id;
-    if (uid==null) throw ApiException("Not logged In");
+  }) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw ApiException("Not logged In");
 
     final patch = <String, dynamic>{};
-    if (username != null){
-      final exists = await _sb
-      .from('profiles')
-      .select('id')
-      .eq('username',username)
-      .neq('id', uid)
-      .maybeSingle();
 
-      if (exists != null){
+    // Έλεγχος αν το username υπάρχει ήδη (Firestore query)
+    if (username != null) {
+      final query = await _db
+          .collection('users')
+          .where('username', isEqualTo: username)
+          .get();
+
+      // Αν βρεθεί άλλος χρήστης με αυτό το username
+      if (query.docs.isNotEmpty && query.docs.first.id != uid) {
         throw ApiException("Username already exists");
       }
+      patch['username'] = username;
     }
 
-    if (email !=null){
-      final res = await _sb.rpc('email_exists',params: {'email_input':email});
-      if (res == true){
-        throw ApiException("Email already exists");
-      }
-    }
+    if (name != null) patch['first_name'] = name;
+    if (surname != null) patch['last_name'] = surname;
+    if (email != null) patch['email'] = email;
 
-    if (name != null) patch['name'] = name;
-    if (surname != null) patch['surname'] = surname;
-    if (email != null) patch['email'] =email;
-    if (username != null) patch['username']= username;
-    
-    if(patch.isNotEmpty){
-      try{
-        await _sb.from('profiles').update(patch).eq('id',uid);
-      }catch(_){
+    if (patch.isNotEmpty) {
+      try {
+        await _db.collection('users').doc(uid).update(patch);
+      } catch (e) {
         throw ApiException("Failed to update Profile");
       }
     }
   }
 
-
-  //Read User
-  Future<Map<String,dynamic>> getMyProfile() async {
-    final uid = _sb.auth.currentUser?.id;
+  // Ανάγνωση Προφίλ
+  Future<Map<String, dynamic>> getMyProfile() async {
+    final uid = _auth.currentUser?.uid;
     if (uid == null) throw ApiException("Not logged In");
 
-    try{
-      return await _sb.from("profiles").select("*").eq('id',uid).single();
-    }catch(_){
+    try {
+      final doc = await _db.collection("users").doc(uid).get();
+      if (!doc.exists) throw ApiException("Profile not found");
+      return doc.data()!;
+    } catch (e) {
       throw ApiException("Failed to load profile");
     }
   }
 
+  // Διαγραφή Προφίλ
+  Future<void> deleteMyProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) throw ApiException("Not logged in");
 
-  //Delete User
-  Future<void> deleteMyProfile() async{
-    final uid = _sb.auth.currentUser?.id;
-    if (uid == null) throw ApiException("Not logged in");
-
-    try{
-      await _sb.from("profiles").delete().eq("id",uid);
-      await _sb.auth.signOut();
-    }catch(_){
+    try {
+      // Διαγραφή από Firestore
+      await _db.collection("users").doc(user.uid).delete();
+      // Διαγραφή από Auth και Sign Out
+      await user.delete();
+    } catch (e) {
       throw ApiException("Failed to delete profile");
     }
   }

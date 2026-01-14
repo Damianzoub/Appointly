@@ -4,28 +4,23 @@ import 'package:appointly/app/welcome_page.dart';
 import 'package:appointly/features/profile/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:appointly/l10n/app_localizations.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Νέο
+import 'package:cloud_firestore/cloud_firestore.dart'; // Νέο
+
+final auth = AuthController();
 
 class AuthController extends ChangeNotifier {
-  final _supabase = Supabase.instance.client;
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
 
-  bool get isLoggedIn => _supabase.auth.currentSession != null;
+  bool get isLoggedIn => _auth.currentUser != null;
 
-  String get displayName {
-    final user = _supabase.auth.currentUser;
-    final metadata = user?.userMetadata;
-    if (metadata == null) return "User";
+  String get displayName => _auth.currentUser?.displayName ?? "User";
 
-    final n = (metadata['first_name'] ?? "").toString().trim();
-    final s = (metadata['last_name'] ?? "").toString().trim();
-    final full = ("$n $s").trim();
-    return full.isEmpty ? (metadata['username'] ?? "User") : full;
-  }
-
-  String get email => _supabase.auth.currentUser?.email ?? "";
+  String get email => _auth.currentUser?.email ?? "";
 
   Future<void> login({required String email, required String password}) async {
-    await _supabase.auth.signInWithPassword(email: email, password: password);
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
     notifyListeners();
   }
 
@@ -37,62 +32,46 @@ class AuthController extends ChangeNotifier {
     required String username,
     required String password,
   }) async {
-    try {
-      // 1. Signup στο auth
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'first_name': name,
-          'last_name': surname,
-          'username': username,
-          'dob': dob.toIso8601String(),
-        },
-      );
+    // 1. Δημιουργία χρήστη
+    UserCredential credential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // 2. Αν το signup πέτυχε, δημιούργησε το profile
-      if (response.user != null) {
-        try {
-          await _supabase.from('profiles').insert({
-            'id': response.user!.id,
-            'username': username,
-            'first_name': name,
-            'last_name': surname,
-            'dob': dob.toIso8601String().split('T')[0], // Μόνο η ημερομηνία
-          });
-        } catch (profileError) {
-          // Αν αποτύχει το profile insert, διέγραψε τον user
-          print('Profile creation failed: $profileError');
-          // Μπορείς να διαγράψεις τον user εδώ αν θέλεις
-        }
-      }
+    // 2. Ενημέρωση Display Name στο Auth profile
+    await credential.user?.updateDisplayName("$name $surname");
 
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
+    // 3. Αποθήκευση στο Firestore (αντίστοιχο των profiles της Supabase)
+    await _db.collection('users').doc(credential.user!.uid).set({
+      'first_name': name,
+      'last_name': surname,
+      'username': username,
+      'dob': dob.toIso8601String(),
+      'email': email,
+      'created_at': FieldValue.serverTimestamp(),
+    });
+
+    notifyListeners();
   }
 
   void logout() async {
-    await _supabase.auth.signOut();
+    await _auth.signOut();
     notifyListeners();
   }
 }
 
-final AuthController auth = AuthController();
-
-class AppRoot extends StatelessWidget {
-  const AppRoot({super.key});
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: auth,
+    return ListenableBuilder(
+      listenable: auth,
       builder: (context, _) {
-        if (!auth.isLoggedIn) {
-          return const WelcomePage();
+        if (auth.isLoggedIn) {
+          return const HomeShell();
         }
-        return const HomeShell();
+        return const WelcomePage();
       },
     );
   }

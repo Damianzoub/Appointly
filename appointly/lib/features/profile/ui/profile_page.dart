@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../app.dart'; // Βεβαιώσου ότι το path οδηγεί στο lib/app.dart
-import '../../../language_provider.dart'; // Βεβαιώσου ότι το path οδηγεί στο lib/language_provider.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import '../../../app.dart';
+import '../../../language_provider.dart';
 import '../../../l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -13,193 +15,331 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _supabase = Supabase.instance.client;
+  final _firebaseAuth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
   Map<String, dynamic>? _profileData;
   bool _isLoading = true;
-  
+
   @override
   void initState() {
     super.initState();
     _fetchProfile();
   }
 
-  Future<void> _showEditUsernameDialog(BuildContext context) async{
-    final t = AppLocalizations.of(context)!;
-    final user = _supabase.auth.currentUser;
-    if(user ==null) return;
-
-    final ctrl = TextEditingController(
-      text: (_profileData?["username"] ?? "").toString(),
-    );
-
-    await showDialog(context: context, builder: (ctx)=>
-    AlertDialog(
-      title: Text(t.username),
-      content: TextField(
-        controller: ctrl,
-        decoration: InputDecoration(
-          labelText: t.username,
-          border: const OutlineInputBorder()
-        ),
-      ),
-      actions: [
-        TextButton(onPressed: ()=> Navigator.pop(ctx), child: Text(t.cancel)),
-        TextButton(onPressed: () async{
-          final newUsername = ctrl.text.trim();
-          if (newUsername.isEmpty) return;
-
-          try{
-            final exists = await _supabase
-            .from("profiles")
-            .select('id')
-            .eq("username",newUsername)
-            .neq("id",user.id)
-            .maybeSingle();
-
-            if (exists !=null){
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Username already exists"))
-              );
-              return;
-            }
-
-            await _supabase
-            .from("profiles")
-            .update({"username":newUsername})
-            .eq('id',user.id);
-            
-            if(!mounted) return;
-            Navigator.pop(ctx);
-
-            await _fetchProfile();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(t.profileUpdated))
-            );
-          }catch(e){
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("update failed: $e"))
-            );
-          }
-
-        }, child: Text(t.save))
-      ],
-    ));
-  } 
-
   Future<void> _fetchProfile() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user != null) {
-        final data = await _supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .single();
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
 
-        if (mounted) {
-          setState(() {
-            _profileData = data;
-            _isLoading = false;
-          });
-        }
-      } else {
-        if (mounted) setState(() => _isLoading = false);
+    try {
+      final doc = await _db.collection('users').doc(user.uid).get();
+      if (mounted) {
+        setState(() {
+          _profileData = doc.data();
+          _isLoading = false;
+        });
       }
     } catch (e) {
-      debugPrint("Error fetching profile: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  String get _fullName {
+    final fName = _profileData?['firstName'] ?? _profileData?['name'] ?? '';
+    final lName = _profileData?['lastName'] ?? _profileData?['surname'] ?? '';
+
+    if (fName.isEmpty && lName.isEmpty) {
+      return _firebaseAuth.currentUser?.displayName ?? "Χρήστης";
+    }
+    return "$fName $lName".trim();
+  }
+
+  String _formatDob(dynamic dob) {
+    if (dob == null) return "Δεν έχει οριστεί";
+    try {
+      if (dob is Timestamp)
+        return DateFormat('dd/MM/yyyy').format(dob.toDate());
+      if (dob is String)
+        return DateFormat('dd/MM/yyyy').format(DateTime.parse(dob));
+    } catch (e) {
+      return dob.toString();
+    }
+    return "Δεν έχει οριστεί";
+  }
+
+  Future<void> _editProfileDialog() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
+
+    final nameCtrl = TextEditingController(
+      text: _profileData?['firstName'] ?? _profileData?['name'] ?? "",
+    );
+    final lastNameCtrl = TextEditingController(
+      text: _profileData?['lastName'] ?? _profileData?['surname'] ?? "",
+    );
+    final usernameCtrl = TextEditingController(
+      text: _profileData?['username'] ?? "",
+    );
+
+    DateTime? selectedDob;
+    var rawDob = _profileData?['dob'];
+    if (rawDob is Timestamp)
+      selectedDob = rawDob.toDate();
+    else if (rawDob is String)
+      selectedDob = DateTime.tryParse(rawDob);
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            "Επεξεργασία Προφίλ",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: "Όνομα",
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: lastNameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: "Επίθετο",
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: usernameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: "Username",
+                    prefixIcon: Icon(Icons.alternate_email),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.cake_outlined,
+                    color: Colors.indigo,
+                  ),
+                  title: Text(
+                    selectedDob == null
+                        ? "Ημερομηνία Γέννησης"
+                        : DateFormat('dd/MM/yyyy').format(selectedDob!),
+                  ),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDob ?? DateTime(2000),
+                      firstDate: DateTime(1920),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null)
+                      setDialogState(() => selectedDob = picked);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Ακύρωση"),
+            ),
+            FilledButton(
+              onPressed: () async {
+                await _db.collection('users').doc(user.uid).set({
+                  'firstName': nameCtrl.text.trim(),
+                  'lastName': lastNameCtrl.text.trim(),
+                  'username': usernameCtrl.text.trim(),
+                  'dob': selectedDob != null
+                      ? Timestamp.fromDate(selectedDob!)
+                      : rawDob,
+                }, SetOptions(merge: true));
+                await user.updateDisplayName(
+                  "${nameCtrl.text.trim()} ${lastNameCtrl.text.trim()}",
+                );
+                if (mounted) Navigator.pop(ctx);
+                _fetchProfile();
+              },
+              child: const Text("Αποθήκευση"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Χρησιμοποιούμε try-catch ή σταθερά κείμενα για να μην κρασάρει αν λείπουν κλειδιά από το .arb
     final t = AppLocalizations.of(context)!;
-    final user = _supabase.auth.currentUser;
+    final langProvider = Provider.of<LanguageProvider>(context);
 
-    final String firstName = _profileData?['first_name'] ?? "";
-    final String lastName = _profileData?['last_name'] ?? "";
-    final String username  = _profileData?['username']??"";
-    String fullName = "$firstName $lastName".trim();
-
-    if (fullName.isEmpty) {
-      fullName = auth.displayName;
-    }
+    final List<Map<String, String>> languages = [
+      {'name': 'Ελληνικά', 'code': 'el', 'flag': '🇬🇷'},
+      {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
+      {'name': 'Deutsch', 'code': 'de', 'flag': '🇩🇪'},
+      {'name': 'Français', 'code': 'fr', 'flag': '🇫🇷'},
+      {'name': 'Español', 'code': 'es', 'flag': '🇪🇸'},
+    ];
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(t.profileTitle),
-        centerTitle: true, // Αυτό το κλειδί υπάρχει
+        title: Text(
+          t.profileTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        actions: [
+          IconButton(
+            onPressed: _editProfileDialog,
+            icon: const Icon(Icons.edit_note_rounded, size: 28),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               children: [
-                const Center(
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.indigo,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
+                // Header Profile Section
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.indigo.withOpacity(0.2),
+                            width: 4,
+                          ),
+                        ),
+                        child: const CircleAvatar(
+                          radius: 55,
+                          backgroundColor: Colors.white,
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: 70,
+                            color: Colors.indigo,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
-                    fullName,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    _fullName,
+                    style: const TextStyle(
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Center(
                   child: Text(
-                    user?.email ?? "",
-                    style: const TextStyle(color: Colors.grey),
+                    "@${_profileData?['username'] ?? 'username'}",
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ),
+
                 const SizedBox(height: 32),
-                const Divider(),
-                Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.edit, color: Colors.indigo),
-                        title: Text(t.username),
-                        subtitle: Text(username.isEmpty ? "-" : username),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _showEditUsernameDialog(context),
-                      ),
-                    ),
+                _buildSectionHeader("Πληροφορίες Λογαριασμού"),
                 const SizedBox(height: 12),
-                // ΔΙΟΡΘΩΜΕΝΟ ListTile: Χρήση σταθερού κειμένου για να μην κρασάρει
-                Card(
-                  child:ListTile(
-                  leading: const Icon(Icons.language, color: Colors.indigo),
-                  title:  Text(t.language),
-                  subtitle: Text(_getCurrentLanguageName(context)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showLanguageSheet(context),
+                _buildModernCard(
+                  child: Column(
+                    children: [
+                      _buildProfileItem(
+                        Icons.cake_outlined,
+                        "Ημερομηνία Γέννησης",
+                        _formatDob(_profileData?['dob']),
+                      ),
+                      const Divider(height: 1),
+                      _buildProfileItem(
+                        Icons.email_outlined,
+                        "Email",
+                        _firebaseAuth.currentUser?.email ?? "-",
+                      ),
+                    ],
                   ),
                 ),
 
-                const SizedBox(height: 20),
-
-                Card(
-                  elevation: 0,
-                  color: Colors.red.withOpacity(0.05),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: Text(
-                      t.logout, // Σταθερό κείμενο για ασφάλεια
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 24),
+                _buildSectionHeader(t.language),
+                const SizedBox(height: 12),
+                _buildModernCard(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value:
+                            languages.any(
+                              (l) =>
+                                  l['code'] == langProvider.locale.languageCode,
+                            )
+                            ? langProvider.locale.languageCode
+                            : 'el',
+                        isExpanded: true,
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Colors.indigo,
+                        ),
+                        items: languages.map((lang) {
+                          return DropdownMenuItem<String>(
+                            value: lang['code'],
+                            child: Row(
+                              children: [
+                                Text(
+                                  lang['flag']!,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  lang['name']!,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newCode) => newCode != null
+                            ? langProvider.setLocale(Locale(newCode))
+                            : null,
                       ),
                     ),
-                    onTap: () => _confirmLogout(context),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  onPressed: () => _confirmLogout(context),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: Text(t.logout),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red[50],
+                    foregroundColor: Colors.red,
+                    elevation: 0,
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ],
@@ -207,72 +347,50 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  String _getCurrentLanguageName(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    switch (code) {
-      case 'el':
-        return "Ελληνικά";
-      case 'en':
-        return "English";
-      case 'de':
-        return "Deutsch";
-      case 'es':
-        return "Español";
-      case 'fr':
-        return "Français";
-      default:
-        return "English";
-    }
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.indigo,
+        ),
+      ),
+    );
   }
 
-  void _showLanguageSheet(BuildContext context) {
-    final provider = context.read<LanguageProvider>();
-
-    final List<Map<String, String>> languages = [
-      {'name': 'Ελληνικά', 'code': 'el', 'flag': '🇬🇷'},
-      {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
-      {'name': 'Deutsch', 'code': 'de', 'flag': '🇩🇪'},
-      {'name': 'Español', 'code': 'es', 'flag': '🇪🇸'},
-      {'name': 'Français', 'code': 'fr', 'flag': '🇫🇷'},
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: languages.map((lang) {
-              final isSelected =
-                  Localizations.localeOf(context).languageCode == lang['code'];
-              return ListTile(
-                leading: Text(
-                  lang['flag']!,
-                  style: const TextStyle(fontSize: 24),
-                ),
-                title: Text(
-                  lang['name']!,
-                  style: TextStyle(
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: isSelected ? Colors.indigo : Colors.black,
-                  ),
-                ),
-                trailing: isSelected
-                    ? const Icon(Icons.check, color: Colors.indigo)
-                    : null,
-                onTap: () {
-                  provider.setLocale(Locale(lang['code']!));
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
+  Widget _buildModernCard({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildProfileItem(IconData icon, String label, String value) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.indigo[400], size: 22),
+      title: Text(
+        label,
+        style: const TextStyle(fontSize: 13, color: Colors.grey),
+      ),
+      subtitle: Text(
+        value,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
         ),
       ),
     );
@@ -282,16 +400,19 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Αποσύνδεση"),
-        content: const Text("Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;"),
+        content: const Text("Είστε σίγουροι ότι θέλετε να βγείτε;"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text("Ακύρωση"),
           ),
-          TextButton(
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              await _supabase.auth.signOut();
+              await _firebaseAuth.signOut();
+              auth.logout();
               if (mounted) {
                 Navigator.of(ctx).pop();
                 Navigator.of(
@@ -299,7 +420,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ).pushNamedAndRemoveUntil('/', (route) => false);
               }
             },
-            child: const Text("Έξοδος", style: TextStyle(color: Colors.red)),
+            child: const Text("Έξοδος"),
           ),
         ],
       ),

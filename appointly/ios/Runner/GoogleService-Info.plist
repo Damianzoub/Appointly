@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyCQNJelVfE5w7ZUqVc5Rm7iORMMmx5X9eE</string>
+	<string>AIzaSyAHWxyhi4rEI4xw0OVfA599VyOpW3n77UI</string>
 	<key>GCM_SENDER_ID</key>
-	<string>547136946132</string>
+	<string>725834170518</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.appointly</string>
 	<key>PROJECT_ID</key>
-	<string>appointly-davag-2025</string>
+	<string>appointly-344bc</string>
 	<key>STORAGE_BUCKET</key>
-	<string>appointly-davag-2025.firebasestorage.app</string>
+	<string>appointly-344bc.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:547136946132:ios:7553a597639f3e415a6041</string>
+	<string>1:725834170518:ios:bf972d05c1ada6e6ccc2b7</string>
 </dict>
 </plist>

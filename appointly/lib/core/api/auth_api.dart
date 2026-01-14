@@ -1,36 +1,37 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase/supabase_client.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Αλλαγή σε Firebase
 import 'api_exceptions.dart';
 
-class AuthApi{
-  final SupabaseClient _sb = SB.client;
+class AuthApi {
+  // Χρήση του FirebaseAuth instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> login({
-    required String email,
-    required String password
-  }) async {
-    try{
-        await _sb.auth.signInWithPassword(email:email,password: password);
-    }on AuthException catch(e){
-      throw ApiException(e.message);
+  Future<void> login({required String email, required String password}) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      throw ApiException(e.message ?? "Σφάλμα σύνδεσης");
     }
   }
 
-  Future<void> logout() async{
-    await _sb.auth.signOut();
+  Future<void> logout() async {
+    await _auth.signOut();
   }
 
   Future<void> signUpAuthOnly({
     required String email,
-    required String password
-  }) async{
-    try{
-      await _sb.auth.signUp(email:email,password: password);
-    }on AuthException catch(e){
-      throw ApiException(e.message);
+    required String password,
+  }) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      throw ApiException(e.message ?? "Σφάλμα εγγραφής");
     }
   }
 
-  String? get currentUserID => _sb.auth.currentUser?.id;
-  bool get isLoggedIn => _sb.auth.currentUser != null;
+  // Επιστρέφει το UID του χρήστη από το Firebase
+  String? get currentUserID => _auth.currentUser?.uid;
+  bool get isLoggedIn => _auth.currentUser != null;
 }

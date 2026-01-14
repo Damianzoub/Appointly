@@ -1,6 +1,6 @@
 import 'package:appointly/app.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Αλλαγή: Firebase αντί για Supabase
 
 class ForgotPasswordPage extends StatefulWidget {
   static const route = "/forgot";
@@ -32,65 +32,64 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Χρησιμοποιούμε τη μέθοδο resetPasswordForEmail που αντιστοιχεί
-      // στο template που έχεις στη Supabase (με το link).
-      await Supabase.instance.client.auth.resetPasswordForEmail(
-        email,
-        // Το redirectTo πρέπει να είναι δηλωμένο στο Supabase Dashboard -> Auth Settings
-        redirectTo: 'io.supabase.flutter://reset-callback/',
-      );
+      // Χρήση Firebase Auth για αποστολή email επαναφοράς
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       setState(() => _emailSent = true);
       _showMsg("Ο σύνδεσμος επαναφοράς στάλθηκε στο email σας!");
-    } on AuthException catch (e) {
-      _showMsg(e.message);
+    } on FirebaseAuthException catch (e) {
+      // Διαχείριση λαθών Firebase (π.χ. λάθος format email)
+      _showMsg(e.message ?? "Παρουσιάστηκε σφάλμα");
     } catch (e) {
-      _showMsg("Παρουσιάστηκε ένα απρόσμενο σφάλμα.");
+      _showMsg("Κάτι πήγε στραβά. Δοκιμάστε ξανά.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showMsg(String message) {
+  void _showMsg(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      title: "Επαναφορά Κωδικού",
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return Scaffold(
+      appBar: AppBar(title: const Text("Επαναφορά Κωδικού")),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            shrinkWrap: true,
             children: [
-              const Icon(
-                Icons.lock_open_rounded,
-                size: 80,
-                color: Colors.indigo,
-              ),
-              const SizedBox(height: 24),
               if (!_emailSent) ...[
+                const Text(
+                  "Ξεχάσατε τον κωδικό σας;",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
                 const Text(
                   "Εισάγετε το email σας και θα σας στείλουμε έναν σύνδεσμο για να ορίσετε νέο κωδικό πρόσβασης.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
                 TextField(
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: "Email",
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
+                  height: 52,
                   child: FilledButton(
                     onPressed: _isLoading ? null : _handleResetPassword,
                     child: _isLoading

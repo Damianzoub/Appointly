@@ -2,6 +2,7 @@ import 'package:appointly/app.dart';
 import 'package:appointly/app/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupPage extends StatefulWidget {
   static const route = "/signup";
@@ -50,10 +51,15 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   Future<void> _submit() async {
+    // Έλεγχος εγκυρότητας φόρμας
     if (!_formKey.currentState!.validate()) return;
+
     if (_dob == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select your date of birth")),
+        const SnackBar(
+          content: Text("Παρακαλώ επιλέξτε ημερομηνία γέννησης"),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -61,6 +67,7 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => _isLoading = true);
 
     try {
+      // Κλήση της signup από τον AuthController (app.dart)
       await auth.signup(
         name: _nameCtrl.text.trim(),
         surname: _surnameCtrl.text.trim(),
@@ -71,19 +78,34 @@ class _SignupPageState extends State<SignupPage> {
       );
 
       if (mounted) {
+        // Εμφάνιση μηνύματος επιτυχίας
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Account created! Please check your email."),
+            content: Text("Ο λογαριασμός δημιουργήθηκε με επιτυχία!"),
             backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pushReplacementNamed(context, LoginPage.route);
+
+        // ΑΜΕΣΗ ΑΝΑΚΑΤΕΥΘΥΝΣΗ:
+        // Καθαρίζουμε το ιστορικό και πηγαίνουμε στην αρχική.
+        // Ο AuthWrapper θα δει ότι ο χρήστης είναι πλέον συνδεδεμένος.
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? "Σφάλμα εγγραφής"),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Σφάλμα: ${e.toString()}"),
+            content: Text("Παρουσιάστηκε σφάλμα: ${e.toString()}"),
             backgroundColor: Colors.red,
           ),
         );
@@ -100,7 +122,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: "Create Account",
+      title: "Δημιουργία Λογαριασμού",
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -110,7 +132,7 @@ class _SignupPageState extends State<SignupPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  "Join us to start booking appointments",
+                  "Γίνετε μέλος για να κλείνετε τα ραντεβού σας",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
@@ -121,11 +143,9 @@ class _SignupPageState extends State<SignupPage> {
                     Expanded(
                       child: TextFormField(
                         controller: _nameCtrl,
-                        decoration: _inputStyle(
-                          "First Name",
-                          Icons.person_outline,
-                        ),
-                        validator: (v) => (v ?? '').isEmpty ? "Required" : null,
+                        decoration: _inputStyle("Όνομα", Icons.person_outline),
+                        validator: (v) =>
+                            (v ?? '').isEmpty ? "Υποχρεωτικό" : null,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -133,10 +153,11 @@ class _SignupPageState extends State<SignupPage> {
                       child: TextFormField(
                         controller: _surnameCtrl,
                         decoration: _inputStyle(
-                          "Last Name",
+                          "Επώνυμο",
                           Icons.person_outline,
                         ),
-                        validator: (v) => (v ?? '').isEmpty ? "Required" : null,
+                        validator: (v) =>
+                            (v ?? '').isEmpty ? "Υποχρεωτικό" : null,
                       ),
                     ),
                   ],
@@ -146,19 +167,16 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _usernameCtrl,
                   decoration: _inputStyle("Username", Icons.alternate_email),
-                  validator: (v) => (v ?? '').isEmpty ? "Required" : null,
+                  validator: (v) => (v ?? '').isEmpty ? "Υποχρεωτικό" : null,
                 ),
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: _inputStyle(
-                    "Email Address",
-                    Icons.email_outlined,
-                  ),
+                  decoration: _inputStyle("Email", Icons.email_outlined),
                   validator: (v) =>
-                      !(v ?? '').contains('@') ? "Invalid email" : null,
+                      !(v ?? '').contains('@') ? "Μη έγκυρο email" : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -184,7 +202,7 @@ class _SignupPageState extends State<SignupPage> {
                         const SizedBox(width: 12),
                         Text(
                           _dob == null
-                              ? "Date of Birth"
+                              ? "Ημερομηνία Γέννησης"
                               : DateFormat('dd/MM/yyyy').format(_dob!),
                           style: TextStyle(
                             fontSize: 16,
@@ -202,7 +220,7 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscure,
-                  decoration: _inputStyle("Password", Icons.lock_outline)
+                  decoration: _inputStyle("Κωδικός", Icons.lock_outline)
                       .copyWith(
                         suffixIcon: IconButton(
                           onPressed: () => setState(() => _obscure = !_obscure),
@@ -212,15 +230,18 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
                   validator: (v) =>
-                      (v ?? '').length < 6 ? "Min 6 characters" : null,
+                      (v ?? '').length < 6 ? "Τουλάχιστον 6 χαρακτήρες" : null,
                 ),
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _confirmPasswordCtrl,
                   obscureText: _confirmObscure,
-                  decoration: _inputStyle("Confirm Password", Icons.lock_reset)
-                      .copyWith(
+                  decoration:
+                      _inputStyle(
+                        "Επιβεβαίωση Κωδικού",
+                        Icons.lock_reset,
+                      ).copyWith(
                         suffixIcon: IconButton(
                           onPressed: () => setState(
                             () => _confirmObscure = !_confirmObscure,
@@ -232,8 +253,9 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                         ),
                       ),
-                  validator: (v) =>
-                      v != _passwordCtrl.text ? "Passwords don't match" : null,
+                  validator: (v) => v != _passwordCtrl.text
+                      ? "Οι κωδικοί δεν ταιριάζουν"
+                      : null,
                 ),
                 const SizedBox(height: 32),
 
@@ -250,7 +272,7 @@ class _SignupPageState extends State<SignupPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text("Create Account"),
+                        : const Text("Δημιουργία Λογαριασμού"),
                   ),
                 ),
               ],

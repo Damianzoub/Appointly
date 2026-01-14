@@ -2,6 +2,7 @@ import 'package:appointly/app.dart';
 import 'package:appointly/app/forgot_password_page.dart';
 import 'package:appointly/app/signup_page.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Απαραίτητο για το FirebaseAuthException
 
 class LoginPage extends StatefulWidget {
   static const route = "/login";
@@ -37,19 +38,65 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (mounted) {
-        Navigator.pop(context);
+        // Αν η σελίδα login ανοίχτηκε με push, την κλείνουμε.
+        // Ο AuthWrapper θα αναλάβει να δείξει το HomeShell.
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Επιτυχής σύνδεση!"),
             behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      // Μετατροπή των κωδικών σφάλματος της Firebase σε φιλικά μηνύματα
+      String friendlyMessage;
+
+      switch (e.code) {
+        case 'invalid-credential':
+        case 'user-not-found':
+        case 'wrong-password':
+          friendlyMessage = "Το email ή ο κωδικός πρόσβασης είναι λανθασμένα.";
+          break;
+        case 'invalid-email':
+          friendlyMessage = "Η διεύθυνση email δεν είναι έγκυρη.";
+          break;
+        case 'user-disabled':
+          friendlyMessage = "Αυτός ο λογαριασμός έχει απενεργοποιηθεί.";
+          break;
+        case 'too-many-requests':
+          friendlyMessage =
+              "Πολλές λανθασμένες προσπάθειες. Δοκιμάστε ξανά αργότερα.";
+          break;
+        default:
+          friendlyMessage = "Παρουσιάστηκε σφάλμα σύνδεσης. Δοκιμάστε ξανά.";
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(friendlyMessage),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Σφάλμα σύνδεσης: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά."),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -116,7 +163,14 @@ class _LoginPageState extends State<LoginPage> {
                   child: FilledButton(
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : const Text("Είσοδος"),
                   ),
                 ),

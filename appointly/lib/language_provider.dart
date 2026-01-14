@@ -6,21 +6,21 @@ class LanguageProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
   Locale get locale => _locale;
 
-  LanguageProvider(){
+  LanguageProvider() {
     _loadSavedLanguage();
   }
 
-  Future<void> _loadSavedLanguage() async{
+  Future<void> _loadSavedLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString(_storageKey);
 
-    if (code != null){
+    if (code != null) {
       _locale = Locale(code);
       notifyListeners();
     }
   }
 
-  Future<void> setLocale(Locale locale) async{
+  Future<void> setLocale(Locale locale) async {
     if (_locale == locale) return;
     _locale = locale;
     notifyListeners();
