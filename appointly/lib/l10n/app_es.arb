@@ -81,6 +81,9 @@
     },
     "todayAppointments": "Citas de hoy",
     "upcomingAppointments": "Próximas citas",
-    "seeAllHistory": "Ver todo el historial"
+    "seeAllHistory": "Ver todo el historial",
+    "upcomingTab": "Próximas",
+    "completedTab": "Completadas",
+    "noAppointments": "No hay citas disponibles"
   }
   

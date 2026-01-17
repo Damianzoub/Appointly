@@ -188,4 +188,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get seeAllHistory => 'Voir tout l\'historique';
+
+  @override
+  String get upcomingTab => 'À venir';
+
+  @override
+  String get completedTab => 'Terminés';
+
+  @override
+  String get noAppointments => 'Aucun rendez-vous disponible';
 }

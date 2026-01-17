@@ -81,6 +81,9 @@
     },
     "todayAppointments": "Rendez-vous d'aujourd'hui",
     "upcomingAppointments": "Prochains rendez-vous",
-    "seeAllHistory": "Voir tout l'historique"
+    "seeAllHistory": "Voir tout l'historique",
+    "upcomingTab": "À venir",
+    "completedTab": "Terminés",
+    "noAppointments": "Aucun rendez-vous disponible"
   }
   

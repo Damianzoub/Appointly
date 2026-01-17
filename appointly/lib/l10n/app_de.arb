@@ -81,6 +81,9 @@
     },
     "todayAppointments": "Termine für heute",
     "upcomingAppointments": "Kommende Termine",
-    "seeAllHistory": "Gesamten Verlauf anzeigen"
+    "seeAllHistory": "Gesamten Verlauf anzeigen",
+    "upcomingTab": "Kommend",
+    "completedTab": "Abgeschlossen",
+    "noAppointments": "Keine Termine verfügbar"
   }
   

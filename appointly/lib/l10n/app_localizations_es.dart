@@ -188,4 +188,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seeAllHistory => 'Ver todo el historial';
+
+  @override
+  String get upcomingTab => 'Próximas';
+
+  @override
+  String get completedTab => 'Completadas';
+
+  @override
+  String get noAppointments => 'No hay citas disponibles';
 }

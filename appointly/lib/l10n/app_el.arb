@@ -82,5 +82,8 @@
   },
   "todayAppointments": "Ραντεβού για σήμερα",
   "upcomingAppointments": "Επερχόμενα Ραντεβού",
-  "seeAllHistory": "Δείτε όλο το ιστορικό"
+  "seeAllHistory": "Δείτε όλο το ιστορικό",
+  "upcomingTab": "Επερχόμενα",
+  "completedTab": "Ολοκληρωμένα",
+  "noAppointments": "Δεν υπάρχουν ραντεβού"
 }

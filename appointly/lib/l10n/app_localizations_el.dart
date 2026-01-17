@@ -188,4 +188,13 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get seeAllHistory => 'Δείτε όλο το ιστορικό';
+
+  @override
+  String get upcomingTab => 'Επερχόμενα';
+
+  @override
+  String get completedTab => 'Ολοκληρωμένα';
+
+  @override
+  String get noAppointments => 'Δεν υπάρχουν ραντεβού';
 }

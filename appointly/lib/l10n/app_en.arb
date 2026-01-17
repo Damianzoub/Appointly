@@ -80,5 +80,8 @@
   },
   "todayAppointments": "Today's Appointments",
   "upcomingAppointments": "Upcoming Appointments",
-  "seeAllHistory": "See all history"
+  "seeAllHistory": "See all history",
+  "upcomingTab": "Upcoming",
+  "completedTab": "Completed",
+  "noAppointments": "No appointments available"
 }

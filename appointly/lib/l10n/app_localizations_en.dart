@@ -188,4 +188,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seeAllHistory => 'See all history';
+
+  @override
+  String get upcomingTab => 'Upcoming';
+
+  @override
+  String get completedTab => 'Completed';
+
+  @override
+  String get noAppointments => 'No appointments available';
 }

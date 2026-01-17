@@ -454,6 +454,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See all history'**
   String get seeAllHistory;
+
+  /// No description provided for @upcomingTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcomingTab;
+
+  /// No description provided for @completedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedTab;
+
+  /// No description provided for @noAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'No appointments available'**
+  String get noAppointments;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
