@@ -30,13 +30,57 @@
   "username": "Όνομα χρήστη",
   "profileUpdated": "Το προφίλ ενημερώθηκε",
 
-
+  "accountinfo":"Πληροφορίες Λογαριασμού",
+  "dateofbirth":"Ημερομηνία Γέννησης",
+  "email":"Ηλεκτρονικό Ταχυδρομείο",
+  "notSet":"Δεν έχει οριστεί",
+  "editProfile":"Επεξεργασία Προφίλ",
+  "firstname":"Όνομα",
+  "lastname":"Επώνυμο",
+  "username":"Όνομα Χρήστη",
+  "save":"Αποθήκευση",
+  "cancel":"Ακύρωση",
+  "appointmentHistory":"Ιστορικό Ραντεβού",
+  "seeAll":"Δείτε Όλα",
   "bookPlaceholder": "Επιλογές Κράτησης",
   "step1Title": "Βήμα 1",
   "step1Subtitle": "Επιλογή Κατηγορίας",
   "step2Title": "Βήμα 2",
   "step2Subtitle": "Επιλογή Παρόχου",
   "step3Title": "Βήμα 3",
-  "step3Subtitle": "Επιλογή Ημερομηνίας & Ώρας"
+  "step3Subtitle": "Επιλογή Ημερομηνίας & Ώρας",
+  
+  "appointmentsEmptyTitle": "Δεν υπάρχουν ραντεβού",
+  "appointmentsEmptySubtitle": "Φαίνεται πως δεν έχετε προγραμματίσει κάποια επίσκεψη. Ξεκινήστε κάνοντας μια νέα κράτηση!",
+  
+  "appointmentStatusActive": "Ενεργό",
+  "change": "Αλλαγή",
+  "cancelAppointment": "Ακύρωση",
+  "cancelAppointmentTitle": "Ακύρωση Ραντεβού",
+  "cancelAppointmentConfirm": "Είστε σίγουροι ότι θέλετε να ακυρώσετε αυτό το ραντεβού;",
+  "no": "Όχι",
+  "yesCancel": "Ναι, Ακύρωση",
+  "stepSelectService": "Επιλέξτε Υπηρεσία",
+  "stepSelectProvider": "Επιλέξτε Πάροχο",
+  "stepDateNotes": "Ημερομηνία & Σημειώσεις",
 
+  "availableServices": "Διαθέσιμες Υπηρεσίες",
+  "selectProfessional": "Επιλέξτε Επαγγελματία",
+  "noProvidersForService": "Δεν βρέθηκαν πάροχοι για αυτή την υπηρεσία.",
+
+  "selectDateTime": "Επιλέξτε Ημερομηνία & Ώρα",
+  "notes": "Σημειώσεις",
+  "notesHint": "Προσθέστε τυχόν λεπτομέρειες...",
+
+  "confirmBooking": "Επιβεβαίωση Κράτησης",
+  "bookingSuccess": "Η κράτηση ολοκληρώθηκε με επιτυχία!",
+  "bookingError": "Σφάλμα κατά την κράτηση: {error}",
+  "@bookingError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "todayAppointments": "Ραντεβού για σήμερα",
+  "upcomingAppointments": "Επερχόμενα Ραντεβού",
+  "seeAllHistory": "Δείτε όλο το ιστορικό"
 }

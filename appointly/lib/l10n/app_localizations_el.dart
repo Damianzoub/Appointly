@@ -32,7 +32,7 @@ class AppLocalizationsEl extends AppLocalizations {
   String get noAppointmentsToday => 'Δεν έχετε προγραμματισμένα ραντεβού για σήμερα.';
 
   @override
-  String get editProfile => 'Επεξεργασία προφίλ';
+  String get editProfile => 'Επεξεργασία Προφίλ';
 
   @override
   String get language => 'Γλώσσα';
@@ -65,10 +65,34 @@ class AppLocalizationsEl extends AppLocalizations {
   String get goToLogin => 'Μετάβαση στη σύνδεση';
 
   @override
-  String get username => 'Όνομα χρήστη';
+  String get username => 'Όνομα Χρήστη';
 
   @override
   String get profileUpdated => 'Το προφίλ ενημερώθηκε';
+
+  @override
+  String get accountinfo => 'Πληροφορίες Λογαριασμού';
+
+  @override
+  String get dateofbirth => 'Ημερομηνία Γέννησης';
+
+  @override
+  String get email => 'Ηλεκτρονικό Ταχυδρομείο';
+
+  @override
+  String get notSet => 'Δεν έχει οριστεί';
+
+  @override
+  String get firstname => 'Όνομα';
+
+  @override
+  String get lastname => 'Επώνυμο';
+
+  @override
+  String get appointmentHistory => 'Ιστορικό Ραντεβού';
+
+  @override
+  String get seeAll => 'Δείτε Όλα';
 
   @override
   String get bookPlaceholder => 'Επιλογές Κράτησης';
@@ -90,4 +114,78 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get step3Subtitle => 'Επιλογή Ημερομηνίας & Ώρας';
+
+  @override
+  String get appointmentsEmptyTitle => 'Δεν υπάρχουν ραντεβού';
+
+  @override
+  String get appointmentsEmptySubtitle => 'Φαίνεται πως δεν έχετε προγραμματίσει κάποια επίσκεψη. Ξεκινήστε κάνοντας μια νέα κράτηση!';
+
+  @override
+  String get appointmentStatusActive => 'Ενεργό';
+
+  @override
+  String get change => 'Αλλαγή';
+
+  @override
+  String get cancelAppointment => 'Ακύρωση';
+
+  @override
+  String get cancelAppointmentTitle => 'Ακύρωση Ραντεβού';
+
+  @override
+  String get cancelAppointmentConfirm => 'Είστε σίγουροι ότι θέλετε να ακυρώσετε αυτό το ραντεβού;';
+
+  @override
+  String get no => 'Όχι';
+
+  @override
+  String get yesCancel => 'Ναι, Ακύρωση';
+
+  @override
+  String get stepSelectService => 'Επιλέξτε Υπηρεσία';
+
+  @override
+  String get stepSelectProvider => 'Επιλέξτε Πάροχο';
+
+  @override
+  String get stepDateNotes => 'Ημερομηνία & Σημειώσεις';
+
+  @override
+  String get availableServices => 'Διαθέσιμες Υπηρεσίες';
+
+  @override
+  String get selectProfessional => 'Επιλέξτε Επαγγελματία';
+
+  @override
+  String get noProvidersForService => 'Δεν βρέθηκαν πάροχοι για αυτή την υπηρεσία.';
+
+  @override
+  String get selectDateTime => 'Επιλέξτε Ημερομηνία & Ώρα';
+
+  @override
+  String get notes => 'Σημειώσεις';
+
+  @override
+  String get notesHint => 'Προσθέστε τυχόν λεπτομέρειες...';
+
+  @override
+  String get confirmBooking => 'Επιβεβαίωση Κράτησης';
+
+  @override
+  String get bookingSuccess => 'Η κράτηση ολοκληρώθηκε με επιτυχία!';
+
+  @override
+  String bookingError(String error) {
+    return 'Σφάλμα κατά την κράτηση: $error';
+  }
+
+  @override
+  String get todayAppointments => 'Ραντεβού για σήμερα';
+
+  @override
+  String get upcomingAppointments => 'Επερχόμενα Ραντεβού';
+
+  @override
+  String get seeAllHistory => 'Δείτε όλο το ιστορικό';
 }

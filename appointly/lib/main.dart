@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
+import 'app/appointements_history_page.dart';
 import 'app.dart';
 import 'language_provider.dart';
 import 'l10n/app_localizations.dart';
@@ -45,6 +45,10 @@ class MainApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          routes: {
+            '/appointments_history': (context) => const AppointmentsHistoryPage(),
+          }
+          ,
           home: const AuthWrapper(),
           theme: ThemeData(
             useMaterial3: true,

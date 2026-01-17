@@ -15,18 +15,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Home';
 
   @override
-  String get bookTitle => 'Book';
+  String get bookTitle => 'Booking';
 
   @override
   String get profileTitle => 'Profile';
 
   @override
   String welcomeBack(String name) {
-    return 'Welcome, $name!';
+    return 'Welcome back, $name!';
   }
 
   @override
-  String get homeSubtitle => 'Here you can view upcoming appointments and manage your profile.';
+  String get homeSubtitle => 'Here you can view your upcoming appointments and manage your profile.';
 
   @override
   String get noAppointmentsToday => 'You have no appointments scheduled for today.';
@@ -56,10 +56,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutTitle => 'Logout';
 
   @override
-  String get logoutConfirm => 'Are you sure you want to logout?';
+  String get logoutConfirm => 'Are you sure you want to log out?';
 
   @override
-  String get loggedOut => 'Logged out successfully';
+  String get loggedOut => 'You have successfully logged out';
 
   @override
   String get goToLogin => 'Go to login';
@@ -71,23 +71,121 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUpdated => 'Profile updated';
 
   @override
-  String get bookPlaceholder => 'Booking Options';
+  String get accountinfo => 'Account information';
+
+  @override
+  String get dateofbirth => 'Date of birth';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get firstname => 'First name';
+
+  @override
+  String get lastname => 'Last name';
+
+  @override
+  String get appointmentHistory => 'Appointment history';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get bookPlaceholder => 'Booking options';
 
   @override
   String get step1Title => 'Step 1';
 
   @override
-  String get step1Subtitle => 'Choose Category';
+  String get step1Subtitle => 'Select category';
 
   @override
   String get step2Title => 'Step 2';
 
   @override
-  String get step2Subtitle => 'Choose Provider';
+  String get step2Subtitle => 'Select provider';
 
   @override
   String get step3Title => 'Step 3';
 
   @override
-  String get step3Subtitle => 'Pick Date & Time';
+  String get step3Subtitle => 'Select date & time';
+
+  @override
+  String get appointmentsEmptyTitle => 'No appointments';
+
+  @override
+  String get appointmentsEmptySubtitle => 'It looks like you haven\'t scheduled any visits yet. Start by making a new booking!';
+
+  @override
+  String get appointmentStatusActive => 'Active';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get cancelAppointment => 'Cancel';
+
+  @override
+  String get cancelAppointmentTitle => 'Cancel appointment';
+
+  @override
+  String get cancelAppointmentConfirm => 'Are you sure you want to cancel this appointment?';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yesCancel => 'Yes, cancel';
+
+  @override
+  String get stepSelectService => 'Select service';
+
+  @override
+  String get stepSelectProvider => 'Select provider';
+
+  @override
+  String get stepDateNotes => 'Date & notes';
+
+  @override
+  String get availableServices => 'Available services';
+
+  @override
+  String get selectProfessional => 'Select professional';
+
+  @override
+  String get noProvidersForService => 'No providers found for this service.';
+
+  @override
+  String get selectDateTime => 'Select date & time';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get notesHint => 'Add any details...';
+
+  @override
+  String get confirmBooking => 'Confirm booking';
+
+  @override
+  String get bookingSuccess => 'Booking completed successfully!';
+
+  @override
+  String bookingError(String error) {
+    return 'Booking error: $error';
+  }
+
+  @override
+  String get todayAppointments => 'Today\'s Appointments';
+
+  @override
+  String get upcomingAppointments => 'Upcoming Appointments';
+
+  @override
+  String get seeAllHistory => 'See all history';
 }

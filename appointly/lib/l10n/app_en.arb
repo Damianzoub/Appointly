@@ -1,17 +1,17 @@
 {
   "appTitle": "Appointly",
   "homeTitle": "Home",
-  "bookTitle": "Book",
+  "bookTitle": "Booking",
   "profileTitle": "Profile",
 
-  "welcomeBack": "Welcome, {name}!",
+  "welcomeBack": "Welcome back, {name}!",
   "@welcomeBack": {
     "placeholders": {
       "name": { "type": "String" }
     }
   },
 
-  "homeSubtitle": "Here you can view upcoming appointments and manage your profile.",
+  "homeSubtitle": "Here you can view your upcoming appointments and manage your profile.",
   "noAppointmentsToday": "You have no appointments scheduled for today.",
 
   "editProfile": "Edit profile",
@@ -24,17 +24,61 @@
   "save": "Save",
 
   "logoutTitle": "Logout",
-  "logoutConfirm": "Are you sure you want to logout?",
-  "loggedOut": "Logged out successfully",
+  "logoutConfirm": "Are you sure you want to log out?",
+  "loggedOut": "You have successfully logged out",
   "goToLogin": "Go to login",
   "username": "Username",
   "profileUpdated": "Profile updated",
 
-  "bookPlaceholder": "Booking Options",
+  "accountinfo": "Account information",
+  "dateofbirth": "Date of birth",
+  "email": "Email",
+  "notSet": "Not set",
+
+  "firstname": "First name",
+  "lastname": "Last name",
+
+  "appointmentHistory": "Appointment history",
+  "seeAll": "See all",
+
+  "bookPlaceholder": "Booking options",
   "step1Title": "Step 1",
-  "step1Subtitle": "Choose Category",
+  "step1Subtitle": "Select category",
   "step2Title": "Step 2",
-  "step2Subtitle": "Choose Provider",
+  "step2Subtitle": "Select provider",
   "step3Title": "Step 3",
-  "step3Subtitle": "Pick Date & Time"
+  "step3Subtitle": "Select date & time",
+  "appointmentsEmptyTitle": "No appointments",
+  "appointmentsEmptySubtitle": "It looks like you haven't scheduled any visits yet. Start by making a new booking!",
+
+  "appointmentStatusActive": "Active",
+  "change": "Change",
+  "cancelAppointment": "Cancel",
+  "cancelAppointmentTitle": "Cancel appointment",
+  "cancelAppointmentConfirm": "Are you sure you want to cancel this appointment?",
+  "no": "No",
+  "yesCancel": "Yes, cancel",
+  "stepSelectService": "Select service",
+  "stepSelectProvider": "Select provider",
+  "stepDateNotes": "Date & notes",
+
+  "availableServices": "Available services",
+  "selectProfessional": "Select professional",
+  "noProvidersForService": "No providers found for this service.",
+
+  "selectDateTime": "Select date & time",
+  "notes": "Notes",
+  "notesHint": "Add any details...",
+
+  "confirmBooking": "Confirm booking",
+  "bookingSuccess": "Booking completed successfully!",
+  "bookingError": "Booking error: {error}",
+  "@bookingError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "todayAppointments": "Today's Appointments",
+  "upcomingAppointments": "Upcoming Appointments",
+  "seeAllHistory": "See all history"
 }

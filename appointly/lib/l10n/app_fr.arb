@@ -1,41 +1,86 @@
 {
     "appTitle": "Appointly",
     "homeTitle": "Accueil",
-    "bookTitle": "Réserver",
+    "bookTitle": "Réservation",
     "profileTitle": "Profil",
-
-    "welcomeBack": "Bienvenue, {name}!",
+  
+    "welcomeBack": "Bon retour, {name} !",
     "@welcomeBack": {
-        "placeholders": {
-            "name": { "type": "String" }
-        }
+      "placeholders": {
+        "name": { "type": "String" }
+      }
     },
-
-    "homeSubtitle": "Ici, vous pouvez voir les rendez-vous à venir et gérer votre profil.",
-    "noAppointmentsToday": "Aucun rendez-vous prévu pour aujourd'hui.",
-
+  
+    "homeSubtitle": "Ici, vous pouvez voir vos rendez-vous à venir et gérer votre profil.",
+    "noAppointmentsToday": "Vous n'avez aucun rendez-vous prévu aujourd'hui.",
+  
     "editProfile": "Modifier le profil",
     "language": "Langue",
-    "logout": "Se déconnecter",
+    "logout": "Déconnexion",
     "notLoggedIn": "Vous n'êtes pas connecté",
-    "login": "Se connecter",
-
+    "login": "Connexion",
+  
     "cancel": "Annuler",
     "save": "Enregistrer",
-
+  
     "logoutTitle": "Déconnexion",
     "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
-    "loggedOut": "Déconnecté avec succès",
+    "loggedOut": "Déconnexion réussie",
     "goToLogin": "Aller à la connexion",
-    "username": "Nom d’utilisateur",
+  
+    "username": "Nom d'utilisateur",
     "profileUpdated": "Profil mis à jour",
-
+  
+    "accountinfo": "Informations du compte",
+    "dateofbirth": "Date de naissance",
+    "email": "Email",
+    "notSet": "Non défini",
+  
+    "firstname": "Prénom",
+    "lastname": "Nom",
+  
+    "appointmentHistory": "Historique des rendez-vous",
+    "seeAll": "Voir tout",
+  
     "bookPlaceholder": "Options de réservation",
     "step1Title": "Étape 1",
-    "step1Subtitle": "Choisir une catégorie",
+    "step1Subtitle": "Sélection de la catégorie",
     "step2Title": "Étape 2",
-    "step2Subtitle": "Choisir un prestataire",
+    "step2Subtitle": "Sélection du prestataire",
     "step3Title": "Étape 3",
-    "step3Subtitle": "Choisir date et heure"
+    "step3Subtitle": "Sélection de la date et de l'heure",
+    "appointmentsEmptyTitle": "Aucun rendez-vous",
+    "appointmentsEmptySubtitle": "Il semble que vous n’ayez encore programmé aucune visite. Commencez par faire une nouvelle réservation !",
 
-}
+    "appointmentStatusActive": "Actif",
+    "change": "Modifier",
+    "cancelAppointment": "Annuler",
+    "cancelAppointmentTitle": "Annuler le rendez-vous",
+    "cancelAppointmentConfirm": "Êtes-vous sûr de vouloir annuler ce rendez-vous ?",
+    "no": "Non",
+    "yesCancel": "Oui, annuler",
+    "stepSelectService": "Sélectionner un service",
+    "stepSelectProvider": "Sélectionner un professionnel",
+    "stepDateNotes": "Date et notes",
+  
+    "availableServices": "Services disponibles",
+    "selectProfessional": "Sélectionnez un professionnel",
+    "noProvidersForService": "Aucun professionnel trouvé pour ce service.",
+  
+    "selectDateTime": "Sélectionner la date et l'heure",
+    "notes": "Notes",
+    "notesHint": "Ajoutez des détails...",
+  
+    "confirmBooking": "Confirmer la réservation",
+    "bookingSuccess": "Réservation effectuée avec succès !",
+    "bookingError": "Erreur lors de la réservation : {error}",
+    "@bookingError": {
+      "placeholders": {
+        "error": { "type": "String" }
+      }
+    },
+    "todayAppointments": "Rendez-vous d'aujourd'hui",
+    "upcomingAppointments": "Prochains rendez-vous",
+    "seeAllHistory": "Voir tout l'historique"
+  }
+  

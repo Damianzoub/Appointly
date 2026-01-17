@@ -15,25 +15,24 @@ class _HomePageState extends State<HomePage> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Μέθοδος για την ακύρωση ραντεβού
   Future<void> _cancelAppointment(String docId) async {
-    final bool? confirm = await showDialog(
+    final t = AppLocalizations.of(context)!;
+
+    final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Ακύρωση Ραντεβού"),
-        content: const Text(
-          "Είστε σίγουροι ότι θέλετε να ακυρώσετε αυτό το ραντεβού;",
-        ),
+        title: Text(t.cancelAppointmentTitle),
+        content: Text(t.cancelAppointmentConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Όχι"),
+            child: Text(t.no),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              "Ναι, Ακύρωση",
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              t.yesCancel,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -47,44 +46,52 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Μέθοδος για την επεξεργασία ημερομηνίας ραντεβού
+  bool _isSameDay(DateTime a, DateTime b){
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   Future<void> _editAppointment(String docId, DateTime currentDate) async {
     final newDate = await showDatePicker(
       context: context,
-      initialDate: currentDate,
+      initialDate: currentDate.isAfter(DateTime.now()) ? currentDate : DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
     );
-    if (newDate != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(currentDate),
-      );
-      if (time != null) {
-        final finalDateTime = DateTime(
-          newDate.year,
-          newDate.month,
-          newDate.day,
-          time.hour,
-          time.minute,
-        );
-        await _db.collection('appointments').doc(docId).update({
-          'dateTime': Timestamp.fromDate(finalDateTime),
-        });
-      }
-    }
+
+    if (newDate == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(currentDate),
+    );
+
+    if (time == null) return;
+
+    final finalDateTime = DateTime(
+      newDate.year,
+      newDate.month,
+      newDate.day,
+      time.hour,
+      time.minute,
+    );
+
+    await _db.collection('appointments').doc(docId).update({
+      'dateTime': Timestamp.fromDate(finalDateTime),
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
-    // Ερώτημα στη Firestore για όλα τα ενεργά ραντεβού του χρήστη
-    Query query = _db
+    final uid = _auth.currentUser?.uid;
+
+    final Query query = _db
         .collection('appointments')
-        .where('userId', isEqualTo: _auth.currentUser?.uid)
+        .where('userId', isEqualTo: uid)
         .where('status', isEqualTo: 'active')
-        .orderBy('dateTime'); // Προαιρετική ταξινόμηση βάσει ημερομηνίας
+        .where('dateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
+        .orderBy('dateTime');
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -98,36 +105,71 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: query.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: uid == null
+          ? _buildEmptyState(context, t) // ή φτιάξε δικό σου "not logged in" state
+          : StreamBuilder<QuerySnapshot>(
+              stream: query.snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          final docs = snapshot.data?.docs ?? [];
+                final docs = snapshot.data?.docs ?? [];
 
-          // Εμφάνιση Empty State αν δεν υπάρχουν ραντεβού
-          if (docs.isEmpty) {
-            return _buildEmptyState(context, t);
-          }
+                if (docs.isEmpty) {
+                  return _buildEmptyState(context, t);
+                }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
-              final date = (data['dateTime'] as Timestamp).toDate();
-              return _buildAppointmentCard(docs[index].id, data, date);
-            },
-          );
-        },
-      ),
+                final now = DateTime.now();
+                final todaysDocs = <QueryDocumentSnapshot>[];
+                final upcomingDocs = <QueryDocumentSnapshot>[];
+
+                for (final d in docs){
+                  final data = d.data() as Map<String,dynamic>;
+                  final ts = data['dateTime'] as Timestamp?;
+                  if (ts == null) continue;
+
+                  final dt = ts.toDate();
+                  if (_isSameDay(dt,now)){
+                    todaysDocs.add(d);
+                  } else {
+                    upcomingDocs.add(d);
+                  }
+                }
+                //added the sections for today and upcoming and history
+                return ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    //Today section (if exists)
+                  if (todaysDocs.isNotEmpty) ...[
+                    _buildSectionTitle(t.todayAppointments),
+                    const SizedBox(height:12),
+                    ...todaysDocs.map((doc){
+                      final data = doc.data() as Map<String,dynamic>;
+                      final date = (data['dateTime'] as Timestamp).toDate();
+                      return _buildAppointmentCard(context: context, t: t, id: doc.id, data: data, date: date);
+                    }),
+                    const SizedBox(height:24)
+                  ],
+                  //Upcoming section
+                  _buildSectionTitle(t.upcomingAppointments),
+                  const SizedBox(height:12),
+                  ...upcomingDocs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final date = (data['dateTime'] as Timestamp).toDate();
+                    return _buildAppointmentCard(context: context, t: t, id: doc.id, data: data, date: date);
+                  }),
+                  const SizedBox(height:16),
+                  //See all history button
+                  _buildHistoryButton(context, t)
+                  ],
+                );
+              },
+            ),
     );
   }
 
-  // Μοντέρνο Empty State χωρίς το κουμπί
-  Widget _buildEmptyState(BuildContext context, dynamic t) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations t) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -148,17 +190,18 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 30),
             Text(
-              "Δεν υπάρχουν ραντεβού",
+              t.appointmentsEmptyTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Φαίνεται πως δεν έχετε προγραμματίσει κάποια επίσκεψη. Ξεκινήστε κάνοντας μια νέα κράτηση!",
+            Text(
+              t.appointmentsEmptySubtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ],
         ),
@@ -166,12 +209,45 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Κάρτα εμφάνισης ραντεβού
-  Widget _buildAppointmentCard(
-    String id,
-    Map<String, dynamic> data,
-    DateTime date,
-  ) {
+  Widget _buildSectionTitle(String title){
+    return Padding(
+      padding: const EdgeInsets.only(left:4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color:Colors.indigo
+        )
+      ),
+    );
+  }
+
+  Widget _buildHistoryButton(BuildContext context,AppLocalizations t){
+    return SizedBox(width:double.infinity,
+    child: OutlinedButton.icon(onPressed: ()=> Navigator.pushNamed(context,'/appointments_history'),
+    icon: const Icon(Icons.history_rounded),
+    label: Text(t.seeAllHistory),
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      padding: const EdgeInsets.symmetric(vertical: 14)
+    ),));
+  }
+
+  Widget _buildAppointmentCard({
+    required BuildContext context,
+    required AppLocalizations t,
+    required String id,
+    required Map<String, dynamic> data,
+    required DateTime date,
+  }) {
+    final serviceName = (data['serviceName'] ?? '').toString();
+    final providerName = (data['providerName'] ?? '').toString();
+
+    // Locale-aware date formatting
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final formatted = DateFormat('dd MMM yyyy • HH:mm', localeTag).format(date);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -200,13 +276,17 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            data['serviceName'],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Text(
+                              serviceName,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -216,9 +296,9 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.green.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              "Active",
-                              style: TextStyle(
+                            child: Text(
+                              t.appointmentStatusActive,
+                              style: const TextStyle(
                                 color: Colors.green,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -236,9 +316,12 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.grey,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            data['providerName'],
-                            style: const TextStyle(color: Colors.grey),
+                          Expanded(
+                            child: Text(
+                              providerName,
+                              style: const TextStyle(color: Colors.grey),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
@@ -252,7 +335,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            DateFormat('dd MMM yyyy • HH:mm').format(date),
+                            formatted,
                             style: const TextStyle(
                               color: Colors.grey,
                               fontWeight: FontWeight.w500,
@@ -267,7 +350,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton.icon(
                             onPressed: () => _editAppointment(id, date),
                             icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: const Text("Αλλαγή"),
+                            label: Text(t.change),
                           ),
                           const SizedBox(width: 8),
                           TextButton.icon(
@@ -277,9 +360,9 @@ class _HomePageState extends State<HomePage> {
                               size: 18,
                               color: Colors.red,
                             ),
-                            label: const Text(
-                              "Ακύρωση",
-                              style: TextStyle(color: Colors.red),
+                            label: Text(
+                              t.cancelAppointment,
+                              style: const TextStyle(color: Colors.red),
                             ),
                           ),
                         ],

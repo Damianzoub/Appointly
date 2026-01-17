@@ -1,42 +1,86 @@
 {
     "appTitle": "Appointly",
     "homeTitle": "Inicio",
-    "bookTitle": "Reservar",
+    "bookTitle": "Reserva",
     "profileTitle": "Perfil",
-
-    "welcomeBack": "¡Bienvenido, {name}!",
+  
+    "welcomeBack": "¡Bienvenido de nuevo, {name}!",
     "@welcomeBack": {
-        "placeholders": {
-            "name": { "type": "String" }
-        }
+      "placeholders": {
+        "name": { "type": "String" }
+      }
     },
-
-    "homeSubtitle": "Aquí puedes ver las próximas citas y gestionar tu perfil.",
-    "noAppointmentsToday": "No hay citas programadas para hoy.",
-
+  
+    "homeSubtitle": "Aquí puedes ver tus próximas citas y gestionar tu perfil.",
+    "noAppointmentsToday": "No tienes citas programadas para hoy.",
+  
     "editProfile": "Editar perfil",
     "language": "Idioma",
     "logout": "Cerrar sesión",
     "notLoggedIn": "No has iniciado sesión",
     "login": "Iniciar sesión",
-
+  
     "cancel": "Cancelar",
     "save": "Guardar",
-
+  
     "logoutTitle": "Cerrar sesión",
     "logoutConfirm": "¿Estás seguro de que deseas cerrar sesión?",
-    "loggedOut": "Sesión cerrada correctamente",
-    "goToLogin": "Ir a iniciar sesión",
+    "loggedOut": "Has cerrado sesión correctamente",
+    "goToLogin": "Ir a inicio de sesión",
+  
     "username": "Nombre de usuario",
     "profileUpdated": "Perfil actualizado",
-
-
+  
+    "accountinfo": "Información de la cuenta",
+    "dateofbirth": "Fecha de nacimiento",
+    "email": "Correo electrónico",
+    "notSet": "No establecido",
+  
+    "firstname": "Nombre",
+    "lastname": "Apellido",
+  
+    "appointmentHistory": "Historial de citas",
+    "seeAll": "Ver todo",
+  
     "bookPlaceholder": "Opciones de reserva",
     "step1Title": "Paso 1",
-    "step1Subtitle": "Elegir categoría",
+    "step1Subtitle": "Seleccionar categoría",
     "step2Title": "Paso 2",
-    "step2Subtitle": "Elegir proveedor",
+    "step2Subtitle": "Seleccionar proveedor",
     "step3Title": "Paso 3",
-    "step3Subtitle": "Seleccionar fecha y hora"
+    "step3Subtitle": "Seleccionar fecha y hora",
+    "appointmentsEmptyTitle": "No hay citas",
+    "appointmentsEmptySubtitle": "Parece que aún no has programado ninguna visita. ¡Empieza haciendo una nueva reserva!",
+  
+    "appointmentStatusActive": "Activa",
+    "change": "Cambiar",
+    "cancelAppointment": "Cancelar",
+    "cancelAppointmentTitle": "Cancelar cita",
+    "cancelAppointmentConfirm": "¿Estás seguro de que quieres cancelar esta cita?",
+    "no": "No",
+    "yesCancel": "Sí, cancelar",
+    "stepSelectService": "Seleccionar servicio",
+    "stepSelectProvider": "Seleccionar profesional",
+    "stepDateNotes": "Fecha y notas",
 
-}
+    "availableServices": "Servicios disponibles",
+    "selectProfessional": "Selecciona un profesional",
+    "noProvidersForService": "No se encontraron profesionales para este servicio.",
+
+    "selectDateTime": "Seleccionar fecha y hora",
+    "notes": "Notas",
+    "notesHint": "Añade cualquier detalle...",
+
+    "confirmBooking": "Confirmar reserva",
+    "bookingSuccess": "¡La reserva se completó correctamente!",
+    "bookingError": "Error al reservar: {error}",
+    "@bookingError": {
+      "placeholders": {
+        "error": { "type": "String" }
+      }
+    },
+    "todayAppointments": "Citas de hoy",
+    "upcomingAppointments": "Próximas citas",
+    "seeAllHistory": "Ver todo el historial"
+  }
+  

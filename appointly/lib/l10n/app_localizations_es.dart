@@ -15,21 +15,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeTitle => 'Inicio';
 
   @override
-  String get bookTitle => 'Reservar';
+  String get bookTitle => 'Reserva';
 
   @override
   String get profileTitle => 'Perfil';
 
   @override
   String welcomeBack(String name) {
-    return '¡Bienvenido, $name!';
+    return '¡Bienvenido de nuevo, $name!';
   }
 
   @override
-  String get homeSubtitle => 'Aquí puedes ver las próximas citas y gestionar tu perfil.';
+  String get homeSubtitle => 'Aquí puedes ver tus próximas citas y gestionar tu perfil.';
 
   @override
-  String get noAppointmentsToday => 'No hay citas programadas para hoy.';
+  String get noAppointmentsToday => 'No tienes citas programadas para hoy.';
 
   @override
   String get editProfile => 'Editar perfil';
@@ -59,10 +59,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get logoutConfirm => '¿Estás seguro de que deseas cerrar sesión?';
 
   @override
-  String get loggedOut => 'Sesión cerrada correctamente';
+  String get loggedOut => 'Has cerrado sesión correctamente';
 
   @override
-  String get goToLogin => 'Ir a iniciar sesión';
+  String get goToLogin => 'Ir a inicio de sesión';
 
   @override
   String get username => 'Nombre de usuario';
@@ -71,23 +71,121 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileUpdated => 'Perfil actualizado';
 
   @override
+  String get accountinfo => 'Información de la cuenta';
+
+  @override
+  String get dateofbirth => 'Fecha de nacimiento';
+
+  @override
+  String get email => 'Correo electrónico';
+
+  @override
+  String get notSet => 'No establecido';
+
+  @override
+  String get firstname => 'Nombre';
+
+  @override
+  String get lastname => 'Apellido';
+
+  @override
+  String get appointmentHistory => 'Historial de citas';
+
+  @override
+  String get seeAll => 'Ver todo';
+
+  @override
   String get bookPlaceholder => 'Opciones de reserva';
 
   @override
   String get step1Title => 'Paso 1';
 
   @override
-  String get step1Subtitle => 'Elegir categoría';
+  String get step1Subtitle => 'Seleccionar categoría';
 
   @override
   String get step2Title => 'Paso 2';
 
   @override
-  String get step2Subtitle => 'Elegir proveedor';
+  String get step2Subtitle => 'Seleccionar proveedor';
 
   @override
   String get step3Title => 'Paso 3';
 
   @override
   String get step3Subtitle => 'Seleccionar fecha y hora';
+
+  @override
+  String get appointmentsEmptyTitle => 'No hay citas';
+
+  @override
+  String get appointmentsEmptySubtitle => 'Parece que aún no has programado ninguna visita. ¡Empieza haciendo una nueva reserva!';
+
+  @override
+  String get appointmentStatusActive => 'Activa';
+
+  @override
+  String get change => 'Cambiar';
+
+  @override
+  String get cancelAppointment => 'Cancelar';
+
+  @override
+  String get cancelAppointmentTitle => 'Cancelar cita';
+
+  @override
+  String get cancelAppointmentConfirm => '¿Estás seguro de que quieres cancelar esta cita?';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yesCancel => 'Sí, cancelar';
+
+  @override
+  String get stepSelectService => 'Seleccionar servicio';
+
+  @override
+  String get stepSelectProvider => 'Seleccionar profesional';
+
+  @override
+  String get stepDateNotes => 'Fecha y notas';
+
+  @override
+  String get availableServices => 'Servicios disponibles';
+
+  @override
+  String get selectProfessional => 'Selecciona un profesional';
+
+  @override
+  String get noProvidersForService => 'No se encontraron profesionales para este servicio.';
+
+  @override
+  String get selectDateTime => 'Seleccionar fecha y hora';
+
+  @override
+  String get notes => 'Notas';
+
+  @override
+  String get notesHint => 'Añade cualquier detalle...';
+
+  @override
+  String get confirmBooking => 'Confirmar reserva';
+
+  @override
+  String get bookingSuccess => '¡La reserva se completó correctamente!';
+
+  @override
+  String bookingError(String error) {
+    return 'Error al reservar: $error';
+  }
+
+  @override
+  String get todayAppointments => 'Citas de hoy';
+
+  @override
+  String get upcomingAppointments => 'Próximas citas';
+
+  @override
+  String get seeAllHistory => 'Ver todo el historial';
 }

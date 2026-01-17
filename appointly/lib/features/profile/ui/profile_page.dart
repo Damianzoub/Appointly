@@ -53,8 +53,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return "$fName $lName".trim();
   }
 
-  String _formatDob(dynamic dob) {
-    if (dob == null) return "Δεν έχει οριστεί";
+  String _formatDob(dynamic dob, AppLocalizations t) {
+    if (dob == null) return t.notSet;
     try {
       if (dob is Timestamp)
         return DateFormat('dd/MM/yyyy').format(dob.toDate());
@@ -63,10 +63,11 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       return dob.toString();
     }
-    return "Δεν έχει οριστεί";
+    return t.notSet;
   }
 
   Future<void> _editProfileDialog() async {
+    final  t = AppLocalizations.of(context)!;
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
 
@@ -96,8 +97,8 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text(
-            "Επεξεργασία Προφίλ",
+          title:  Text(
+            t.editProfile,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
@@ -106,24 +107,24 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Όνομα",
+                  decoration:  InputDecoration(
+                    labelText: t.firstname,
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: lastNameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Επίθετο",
+                  decoration:  InputDecoration(
+                    labelText: t.lastname,
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: usernameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Username",
+                  decoration:  InputDecoration(
+                    labelText: t.username,
                     prefixIcon: Icon(Icons.alternate_email),
                   ),
                 ),
@@ -136,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   title: Text(
                     selectedDob == null
-                        ? "Ημερομηνία Γέννησης"
+                        ? t.dateofbirth
                         : DateFormat('dd/MM/yyyy').format(selectedDob!),
                   ),
                   onTap: () async {
@@ -259,20 +260,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
 
                 const SizedBox(height: 32),
-                _buildSectionHeader("Πληροφορίες Λογαριασμού"),
+                _buildSectionHeader(t.accountinfo),
                 const SizedBox(height: 12),
                 _buildModernCard(
                   child: Column(
                     children: [
                       _buildProfileItem(
                         Icons.cake_outlined,
-                        "Ημερομηνία Γέννησης",
-                        _formatDob(_profileData?['dob']),
+                        t.dateofbirth,
+                        _formatDob(_profileData?['dob'],t),
                       ),
                       const Divider(height: 1),
                       _buildProfileItem(
                         Icons.email_outlined,
-                        "Email",
+                        t.email,
                         _firebaseAuth.currentUser?.email ?? "-",
                       ),
                     ],
@@ -325,6 +326,26 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height:24),
+                _buildSectionHeader(t.appointmentHistory),
+                const SizedBox(height: 12),
+                _buildModernCard(child: ListTile(
+                  leading: Icon(Icons.history_rounded,color:Colors.indigo[400]),
+                  title: Text(
+                    t.appointmentHistory,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600
+                    ),),
+                    subtitle: Text(
+                      t.seeAll,
+                      style: TextStyle(color:Colors.grey[600]),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: (){
+                      Navigator.pushNamed(context, '/appointments_history');
+                    },
+                  )
                 ),
 
                 const SizedBox(height: 32),
@@ -397,16 +418,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _confirmLogout(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Αποσύνδεση"),
-        content: const Text("Είστε σίγουροι ότι θέλετε να βγείτε;"),
+        title:  Text(t.logoutTitle),
+        content:  Text(t.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Ακύρωση"),
+            child:  Text(t.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -420,7 +442,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ).pushNamedAndRemoveUntil('/', (route) => false);
               }
             },
-            child: const Text("Έξοδος"),
+            child: Text(t.logout),
           ),
         ],
       ),

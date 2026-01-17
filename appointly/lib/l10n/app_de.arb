@@ -1,42 +1,86 @@
 {
     "appTitle": "Appointly",
     "homeTitle": "Startseite",
-    "bookTitle": "Buchen",
+    "bookTitle": "Buchung",
     "profileTitle": "Profil",
-
+  
     "welcomeBack": "Willkommen zurück, {name}!",
     "@welcomeBack": {
-        "placeholders": {
-            "name": { "type": "String" }
-        }
+      "placeholders": {
+        "name": { "type": "String" }
+      }
     },
-
-    "homeSubtitle": "Hier können Sie Ihre bevorstehenden Termine einsehen und Ihr Profil verwalten.",
+  
+    "homeSubtitle": "Hier können Sie Ihre kommenden Termine sehen und Ihr Profil verwalten.",
     "noAppointmentsToday": "Sie haben heute keine geplanten Termine.",
-
+  
     "editProfile": "Profil bearbeiten",
     "language": "Sprache",
     "logout": "Abmelden",
-    "notLoggedIn": "Nicht angemeldet",
+    "notLoggedIn": "Sie sind nicht angemeldet",
     "login": "Anmelden",
-
+  
     "cancel": "Abbrechen",
     "save": "Speichern",
-
+  
     "logoutTitle": "Abmelden",
-    "logoutConfirm": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+    "logoutConfirm": "Möchten Sie sich wirklich abmelden?",
     "loggedOut": "Sie wurden erfolgreich abgemeldet",
-    "goToLogin": "Zum Login",
+    "goToLogin": "Zur Anmeldung",
+  
     "username": "Benutzername",
     "profileUpdated": "Profil aktualisiert",
-
-
+  
+    "accountinfo": "Kontoinformationen",
+    "dateofbirth": "Geburtsdatum",
+    "email": "E-Mail",
+    "notSet": "Nicht festgelegt",
+  
+    "firstname": "Vorname",
+    "lastname": "Nachname",
+  
+    "appointmentHistory": "Terminverlauf",
+    "seeAll": "Alle anzeigen",
+  
     "bookPlaceholder": "Buchungsoptionen",
     "step1Title": "Schritt 1",
-    "step1Subtitle": "Kategorie wählen",
+    "step1Subtitle": "Kategorie auswählen",
     "step2Title": "Schritt 2",
-    "step2Subtitle": "Anbieter wählen",
+    "step2Subtitle": "Anbieter auswählen",
     "step3Title": "Schritt 3",
-    "step3Subtitle": "Datum & Uhrzeit wählen"
+    "step3Subtitle": "Datum und Uhrzeit auswählen",
+    "appointmentsEmptyTitle": "Keine Termine",
+    "appointmentsEmptySubtitle": "Es sieht so aus, als hätten Sie noch keinen Termin geplant. Starten Sie mit einer neuen Buchung!",
 
-}
+    "appointmentStatusActive": "Aktiv",
+    "change": "Ändern",
+    "cancelAppointment": "Stornieren",
+    "cancelAppointmentTitle": "Termin stornieren",
+    "cancelAppointmentConfirm": "Möchten Sie diesen Termin wirklich stornieren?",
+    "no": "Nein",
+    "yesCancel": "Ja, stornieren",
+    "stepSelectService": "Dienstleistung auswählen",
+    "stepSelectProvider": "Anbieter auswählen",
+    "stepDateNotes": "Datum und Notizen",
+
+    "availableServices": "Verfügbare Dienstleistungen",
+    "selectProfessional": "Anbieter auswählen",
+    "noProvidersForService": "Für diese Dienstleistung wurden keine Anbieter gefunden.",
+
+    "selectDateTime": "Datum und Uhrzeit auswählen",
+    "notes": "Notizen",
+    "notesHint": "Fügen Sie Details hinzu...",
+
+    "confirmBooking": "Buchung bestätigen",
+    "bookingSuccess": "Buchung erfolgreich abgeschlossen!",
+    "bookingError": "Fehler bei der Buchung: {error}",
+    "@bookingError": {
+      "placeholders": {
+        "error": { "type": "String" }
+      }
+    },
+    "todayAppointments": "Termine für heute",
+    "upcomingAppointments": "Kommende Termine",
+    "seeAllHistory": "Gesamten Verlauf anzeigen"
+  }
+  
