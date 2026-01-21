@@ -1,6 +1,6 @@
 import 'package:appointly/app.dart';
-import 'package:appointly/app/forgot_password_page.dart';
-import 'package:appointly/app/signup_page.dart';
+import 'package:appointly/pages/forgot_password_page.dart';
+import 'package:appointly/pages/signup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Απαραίτητο για το FirebaseAuthException
 

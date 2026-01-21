@@ -46,9 +46,9 @@ class MainApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           routes: {
-            '/appointments_history': (context) => const AppointmentsHistoryPage(),
-          }
-          ,
+            '/appointments_history': (context) =>
+                const AppointmentsHistoryPage(),
+          },
           home: const AuthWrapper(),
           theme: ThemeData(
             useMaterial3: true,

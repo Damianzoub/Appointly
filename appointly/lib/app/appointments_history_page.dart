@@ -16,14 +16,10 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
-  DateTime? _cutoff;
-  int tabIndex = 0; // 0 = upcoming, 1 = completed (past)
-
-  @override
-  void initState() {
-    super.initState();
-    _cutoff = DateTime.now().subtract(const Duration(minutes: 5));
-  }
+  String? _selectedCategoryId;
+  // Φιλτράρισμα περιόδου: All, Day, Week, Month (όπως στην home_page)
+  String _selectedPeriod = 'All';
+  int tabIndex = 0; // 0 = upcoming, 1 = completed
 
   @override
   Widget build(BuildContext context) {
@@ -37,17 +33,6 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
       );
     }
 
-    final uid = user.uid;
-    final cutoff =
-        _cutoff ?? DateTime.now().subtract(const Duration(minutes: 5));
-
-    // Fetch all active appointments; split to tabs in UI
-    final query = _db
-        .collection("appointments")
-        .where("userId", isEqualTo: uid)
-        .where("status", isEqualTo: "active")
-        .orderBy("dateTime", descending: false);
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -56,244 +41,295 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildToggle(t),
-          ),
-          const SizedBox(height: 12),
+          _buildFilters(),
+          _buildTabs(t),
+          Expanded(child: _buildAppointmentsList(user.uid)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,
+      child: Row(
+        children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: query.snapshots(),
+              stream: _db.collection('categories').snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        snapshot.error.toString(),
-                        style: const TextStyle(color: Colors.red),
+                return DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedCategoryId,
+                  hint: const Text("Κατηγορία"),
+                  underline: const SizedBox(),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text("Όλες")),
+                    if (snapshot.hasData)
+                      ...snapshot.data!.docs.map(
+                        (doc) => DropdownMenuItem(
+                          value: doc.id,
+                          child: Text(doc['name'] ?? ""),
+                        ),
                       ),
-                    ),
-                  );
-                }
-
-                final docs = snapshot.data?.docs ?? [];
-
-                // Split docs based on cutoff and selected tab
-                final filtered = docs.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final ts = data['dateTime'] as Timestamp?;
-                  if (ts == null) return false;
-
-                  final dt = ts.toDate();
-
-                  if (tabIndex == 0) {
-                    return !dt.isBefore(cutoff); // upcoming
-                  } else {
-                    return dt.isBefore(cutoff); // completed (past)
-                  }
-                }).toList();
-
-                if (filtered.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        t.noAppointments,
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ),
-                  );
-                }
-
-                // Show newest first in completed tab
-                if (tabIndex == 1) {
-                  filtered.sort((a, b) {
-                    final aTs = (a.data() as Map<String, dynamic>)['dateTime']
-                        as Timestamp?;
-                    final bTs = (b.data() as Map<String, dynamic>)['dateTime']
-                        as Timestamp?;
-                    final aDt =
-                        aTs?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
-                    final bDt =
-                        bTs?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
-                    return bDt.compareTo(aDt);
-                  });
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, i) {
-                    final data = filtered[i].data() as Map<String, dynamic>;
-                    final ts = data['dateTime'] as Timestamp?;
-                    if (ts == null) return const SizedBox.shrink();
-
-                    final date = ts.toDate();
-                    final isCompletedView = tabIndex == 1;
-
-                    return _appointmentTile(
-                      context,
-                      t,
-                      data,
-                      date,
-                      isCompletedView: isCompletedView,
-                    );
-                  },
+                  ],
+                  onChanged: (val) => setState(() => _selectedCategoryId = val),
                 );
               },
             ),
           ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: _selectedPeriod,
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(value: 'All', child: Text("Όλα")),
+                DropdownMenuItem(value: 'Day', child: Text("Ημέρα")),
+                DropdownMenuItem(value: 'Week', child: Text("Εβδομάδα")),
+                DropdownMenuItem(value: 'Month', child: Text("Μήνας")),
+              ],
+              onChanged: (val) => setState(() => _selectedPeriod = val!),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildToggle(AppLocalizations t) {
+  Widget _buildTabs(AppLocalizations t) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          _tabButton(0, t.upcomingTab),
+          const SizedBox(width: 12),
+          _tabButton(1, t.completedTab),
+        ],
+      ),
+    );
+  }
+
+  Widget _tabButton(int index, String label) {
+    bool active = tabIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => tabIndex = index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: active ? Colors.indigo : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: active ? Colors.indigo : Colors.grey[300]!,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: active ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppointmentsList(String uid) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _db
+          .collection("appointments")
+          .where("userId", isEqualTo: uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError)
+          return Center(child: Text("Error: ${snapshot.error}"));
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
+
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        List<QueryDocumentSnapshot> filteredDocs = snapshot.data!.docs.where((
+          doc,
+        ) {
+          final data = doc.data() as Map<String, dynamic>;
+          if (data['dateTime'] == null) return false;
+
+          final date = (data['dateTime'] as Timestamp).toDate();
+          final appointmentDay = DateTime(date.year, date.month, date.day);
+
+          // Διαχωρισμός Upcoming / Completed
+          bool isPast = date.isBefore(now);
+          if (tabIndex == 0 && isPast) return false;
+          if (tabIndex == 1 && !isPast) return false;
+
+          // Φίλτρο Κατηγορίας
+          if (_selectedCategoryId != null &&
+              data['categoryId'] != _selectedCategoryId) {
+            return false;
+          }
+
+          // Λογική Φιλτραρίσματος Περιόδου (όπως στην home_page)
+          if (_selectedPeriod == 'Day') {
+            if (appointmentDay != today) return false;
+          } else if (_selectedPeriod == 'Week') {
+            final sevenDaysFromNow = today.add(const Duration(days: 7));
+            if (appointmentDay.isBefore(today) ||
+                appointmentDay.isAfter(sevenDaysFromNow)) {
+              return false;
+            }
+          } else if (_selectedPeriod == 'Month') {
+            final thirtyDaysFromNow = today.add(const Duration(days: 30));
+            if (appointmentDay.isBefore(today) ||
+                appointmentDay.isAfter(thirtyDaysFromNow)) {
+              return false;
+            }
+          }
+
+          return true;
+        }).toList();
+
+        // Ταξινόμηση
+        filteredDocs.sort((a, b) {
+          final dateA =
+              (a.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
+          final dateB =
+              (b.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
+          return tabIndex == 0
+              ? dateA.compareTo(dateB) // Στα μελλοντικά, το πιο κοντινό πρώτο
+              : dateB.compareTo(
+                  dateA,
+                ); // Στα ολοκληρωμένα, το πιο πρόσφατο πρώτο
+        });
+
+        // Υπολογισμός Συνόλων
+        double totalCost = 0;
+        double totalMinutes = 0;
+
+        for (var doc in filteredDocs) {
+          final data = doc.data() as Map<String, dynamic>;
+          totalCost += (data['cost'] ?? 0).toDouble();
+
+          final duration = (data['duration'] ?? 0).toDouble();
+          totalMinutes += duration;
+        }
+
+        if (filteredDocs.isEmpty) {
+          return const Center(child: Text("Δεν βρέθηκαν ραντεβού."));
+        }
+
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            _buildSummaryCard(filteredDocs.length, totalCost, totalMinutes),
+            const SizedBox(height: 16),
+            ...filteredDocs.map(
+              (doc) =>
+                  _buildAppointmentCard(doc.data() as Map<String, dynamic>),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSummaryCard(int count, double cost, double minutes) {
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.indigo,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.indigo.withOpacity(0.3), blurRadius: 8),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _summaryItem("Ραντεβού", count.toString()),
+          _summaryItem("Σύνολο", "${cost.toStringAsFixed(0)}€"),
+          _summaryItem("Ώρες", "${(minutes / 60).toStringAsFixed(1)}h"),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppointmentCard(Map<String, dynamic> data) {
+    final date = (data['dateTime'] as Timestamp).toDate();
+    final formatted = DateFormat('dd/MM/yyyy HH:mm').format(date);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
         ],
       ),
       child: Row(
         children: [
+          const Icon(Icons.event_note, color: Colors.indigo),
+          const SizedBox(width: 16),
           Expanded(
-            child: _toggleChip(
-              isSelected: tabIndex == 0,
-              label: t.upcomingTab,
-              icon: Icons.schedule_rounded,
-              onTap: () => setState(() {
-                tabIndex = 0;
-                _cutoff = DateTime.now().subtract(const Duration(minutes: 5));
-              }),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _toggleChip(
-              isSelected: tabIndex == 1,
-              label: t.completedTab,
-              icon: Icons.check_circle_rounded,
-              onTap: () => setState(() {
-                tabIndex = 1;
-                _cutoff = DateTime.now().subtract(const Duration(minutes: 5));
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _toggleChip({
-    required bool isSelected,
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.indigo.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.indigo : Colors.grey[600],
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.indigo : Colors.grey[600],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data['serviceName'] ?? "Υπηρεσία",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
+                Text(
+                  data['providerName'] ?? "Πάροχος",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+                Text(
+                  formatted,
+                  style: const TextStyle(
+                    color: Colors.indigo,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _appointmentTile(
-    BuildContext context,
-    AppLocalizations t,
-    Map<String, dynamic> data,
-    DateTime date, {
-    required bool isCompletedView,
-  }) {
-    final localeTag = Localizations.localeOf(context).toLanguageTag();
-    final formatted = DateFormat.yMMMMd(localeTag).add_jm().format(date);
-
-    final service = (data['serviceName'] ?? "").toString();
-    final provider = (data['providerName'] ?? "").toString();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isCompletedView
-              ? Colors.green.withOpacity(0.1)
-              : Colors.indigo.withOpacity(0.1),
-          child: Icon(
-            isCompletedView ? Icons.check_rounded : Icons.event_rounded,
-            color: isCompletedView ? Colors.green : Colors.indigo,
           ),
-        ),
-        title: Text(
-          service,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(provider, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(formatted, style: TextStyle(color: Colors.grey[700])),
-          ],
-        ),
+          Text(
+            "${data['cost'] ?? 0}€",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }

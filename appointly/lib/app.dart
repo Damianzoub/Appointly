@@ -1,6 +1,6 @@
-import 'package:appointly/app/book_page.dart';
-import 'package:appointly/app/home_page.dart';
-import 'package:appointly/app/welcome_page.dart';
+import 'package:appointly/pages/book_page.dart';
+import 'package:appointly/pages/home_page.dart';
+import 'package:appointly/pages/welcome_page.dart';
 import 'package:appointly/features/profile/ui/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:appointly/l10n/app_localizations.dart';

@@ -1,5 +1,5 @@
-import 'package:appointly/app/login_page.dart';
-import 'package:appointly/app/signup_page.dart';
+import 'package:appointly/pages/login_page.dart';
+import 'package:appointly/pages/signup_page.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
