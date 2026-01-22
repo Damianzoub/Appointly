@@ -84,6 +84,61 @@
     "seeAllHistory": "Ver todo el historial",
     "upcomingTab": "Próximas",
     "completedTab": "Completadas",
-    "noAppointments": "No hay citas disponibles"
-  }
+    "noAppointments": "No hay citas disponibles",
+    "selectCategoryTitle": "Selecciona categoría",
+  "categoriesHint": "Categorías",
+  "selectServiceTitle": "Selecciona servicio",
+  "servicesHint": "Servicios",
+  "selectProviderTitle": "Selecciona proveedor",
+  "providerHint": "Profesional / Tienda",
+  "dateNotesTitle": "Fecha y notas",
+  "selectDateTime": "Selecciona fecha y hora",
+  "selectedDateTime": "Seleccionado: {datetime}",
+  "@selectedDateTime": { "placeholders": { "datetime": { "type": "String" } } },
+
+  "notesOptionalHint": "Notas (opcional)",
+  "serviceDetailsTitle": "Detalles del servicio",
+  "noDescription": "No hay descripción disponible.",
+  "durationLabel": "Duración",
+  "minutesShort": "min",
+
+  "bookingPastTimeError": "¡No puedes reservar una cita en una hora pasada!",
+  "providerHoursError": "Horario del proveedor: {start}:00 - {end}:00",
+  "@providerHoursError": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" }
+    }
+  },
+  "timeAlreadyBooked": "¡Esta hora ya está reservada! Elige otra.",
+  "availabilityCheckError": "Error al comprobar disponibilidad: {error}",
+  "@availabilityCheckError": { "placeholders": { "error": { "type": "String" } } },
+
+  "confirmBooking": "Confirmar reserva",
+  "bookingSuccess": "¡Reserva completada con éxito!",
+  "bookingError": "Error de reserva: {error}",
+  "@bookingError": { "placeholders": { "error": { "type": "String" } } },
+  "historyFilterCategoryHint": "Categoría",
+  "historyFilterAllCategories": "Todas",
+  "historyFilterPeriodAll": "Todo",
+  "historyFilterPeriodDay": "Día",
+  "historyFilterPeriodWeek": "Semana",
+  "historyFilterPeriodMonth": "Mes",
+
+  "historyError": "Error: {error}",
+  "@historyError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "historyNoResults": "No se encontraron citas.",
+
+  "historySummaryAppointments": "Citas",
+  "historySummaryTotal": "Total",
+  "historySummaryHours": "Horas",
+
+  "historyFallbackService": "Servicio",
+  "historyFallbackProvider": "Proveedor"
+}
   

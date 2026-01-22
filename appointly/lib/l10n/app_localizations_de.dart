@@ -177,7 +177,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String bookingError(String error) {
-    return 'Fehler bei der Buchung: $error';
+    return 'Buchungsfehler: $error';
   }
 
   @override
@@ -197,4 +197,102 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noAppointments => 'Keine Termine verfügbar';
+
+  @override
+  String get selectCategoryTitle => 'Kategorie auswählen';
+
+  @override
+  String get categoriesHint => 'Kategorien';
+
+  @override
+  String get selectServiceTitle => 'Service auswählen';
+
+  @override
+  String get servicesHint => 'Services';
+
+  @override
+  String get selectProviderTitle => 'Anbieter auswählen';
+
+  @override
+  String get providerHint => 'Profi / Geschäft';
+
+  @override
+  String get dateNotesTitle => 'Datum und Notizen';
+
+  @override
+  String selectedDateTime(String datetime) {
+    return 'Ausgewählt: $datetime';
+  }
+
+  @override
+  String get notesOptionalHint => 'Notizen (optional)';
+
+  @override
+  String get serviceDetailsTitle => 'Service-Details';
+
+  @override
+  String get noDescription => 'Keine Beschreibung verfügbar.';
+
+  @override
+  String get durationLabel => 'Dauer';
+
+  @override
+  String get minutesShort => 'Min.';
+
+  @override
+  String get bookingPastTimeError => 'Du kannst keinen Termin in der Vergangenheit buchen!';
+
+  @override
+  String providerHoursError(int start, int end) {
+    return 'Öffnungszeiten: $start:00 - $end:00';
+  }
+
+  @override
+  String get timeAlreadyBooked => 'Diese Uhrzeit ist bereits gebucht! Bitte wähle eine andere.';
+
+  @override
+  String availabilityCheckError(String error) {
+    return 'Fehler bei der Verfügbarkeitsprüfung: $error';
+  }
+
+  @override
+  String get historyFilterCategoryHint => 'Kategorie';
+
+  @override
+  String get historyFilterAllCategories => 'Alle';
+
+  @override
+  String get historyFilterPeriodAll => 'Alle';
+
+  @override
+  String get historyFilterPeriodDay => 'Tag';
+
+  @override
+  String get historyFilterPeriodWeek => 'Woche';
+
+  @override
+  String get historyFilterPeriodMonth => 'Monat';
+
+  @override
+  String historyError(String error) {
+    return 'Fehler: $error';
+  }
+
+  @override
+  String get historyNoResults => 'Keine Termine gefunden.';
+
+  @override
+  String get historySummaryAppointments => 'Termine';
+
+  @override
+  String get historySummaryTotal => 'Summe';
+
+  @override
+  String get historySummaryHours => 'Stunden';
+
+  @override
+  String get historyFallbackService => 'Service';
+
+  @override
+  String get historyFallbackProvider => 'Anbieter';
 }

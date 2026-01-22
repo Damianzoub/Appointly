@@ -84,6 +84,61 @@
     "seeAllHistory": "Gesamten Verlauf anzeigen",
     "upcomingTab": "Kommend",
     "completedTab": "Abgeschlossen",
-    "noAppointments": "Keine Termine verfügbar"
+    "noAppointments": "Keine Termine verfügbar",
+    "selectCategoryTitle": "Kategorie auswählen",
+  "categoriesHint": "Kategorien",
+  "selectServiceTitle": "Service auswählen",
+  "servicesHint": "Services",
+  "selectProviderTitle": "Anbieter auswählen",
+  "providerHint": "Profi / Geschäft",
+  "dateNotesTitle": "Datum und Notizen",
+  "selectDateTime": "Datum und Uhrzeit auswählen",
+  "selectedDateTime": "Ausgewählt: {datetime}",
+  "@selectedDateTime": { "placeholders": { "datetime": { "type": "String" } } },
+
+  "notesOptionalHint": "Notizen (optional)",
+  "serviceDetailsTitle": "Service-Details",
+  "noDescription": "Keine Beschreibung verfügbar.",
+  "durationLabel": "Dauer",
+  "minutesShort": "Min.",
+
+  "bookingPastTimeError": "Du kannst keinen Termin in der Vergangenheit buchen!",
+  "providerHoursError": "Öffnungszeiten: {start}:00 - {end}:00",
+  "@providerHoursError": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" }
+    }
+  },
+  "timeAlreadyBooked": "Diese Uhrzeit ist bereits gebucht! Bitte wähle eine andere.",
+  "availabilityCheckError": "Fehler bei der Verfügbarkeitsprüfung: {error}",
+  "@availabilityCheckError": { "placeholders": { "error": { "type": "String" } } },
+
+  "confirmBooking": "Buchung bestätigen",
+  "bookingSuccess": "Buchung erfolgreich abgeschlossen!",
+  "bookingError": "Buchungsfehler: {error}",
+  "@bookingError": { "placeholders": { "error": { "type": "String" } } },
+  "historyFilterCategoryHint": "Kategorie",
+  "historyFilterAllCategories": "Alle",
+  "historyFilterPeriodAll": "Alle",
+  "historyFilterPeriodDay": "Tag",
+  "historyFilterPeriodWeek": "Woche",
+  "historyFilterPeriodMonth": "Monat",
+
+  "historyError": "Fehler: {error}",
+  "@historyError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "historyNoResults": "Keine Termine gefunden.",
+
+  "historySummaryAppointments": "Termine",
+  "historySummaryTotal": "Summe",
+  "historySummaryHours": "Stunden",
+
+  "historyFallbackService": "Service",
+  "historyFallbackProvider": "Anbieter"
   }
   

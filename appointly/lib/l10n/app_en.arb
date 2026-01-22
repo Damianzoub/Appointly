@@ -83,5 +83,59 @@
   "seeAllHistory": "See all history",
   "upcomingTab": "Upcoming",
   "completedTab": "Completed",
-  "noAppointments": "No appointments available"
+  "noAppointments": "No appointments available",
+  
+  "selectCategoryTitle": "Select category",
+  "categoriesHint": "Categories",
+  "selectServiceTitle": "Select service",
+  "servicesHint": "Services",
+  "selectProviderTitle": "Select provider",
+  "providerHint": "Professional / Store",
+  "dateNotesTitle": "Date & notes",
+  "selectDateTime": "Select date & time",
+  "selectedDateTime": "Selected: {datetime}",
+  "@selectedDateTime": { "placeholders": { "datetime": { "type": "String" } } },
+  "notesOptionalHint": "Notes (optional)",
+  "serviceDetailsTitle": "Service details",
+  "noDescription": "No description available.",
+  "durationLabel": "Duration",
+  "minutesShort": "min",
+  "bookingPastTimeError": "You can't book an appointment in a past time!",
+  "providerHoursError": "Provider hours: {start}:00 - {end}:00",
+  "@providerHoursError": {
+  "placeholders": {
+        "start": { "type": "int" },
+        "end": { "type": "int" }
+      }
+    },
+  "timeAlreadyBooked": "This time slot is already booked! Choose another one.",
+  "availabilityCheckError": "Availability check error: {error}",
+  "@availabilityCheckError": { "placeholders": { "error": { "type": "String" } } },
+  "confirmBooking": "Confirm booking",
+  "bookingSuccess": "Booking completed successfully!",
+  "bookingError": "Booking error: {error}",
+  "@bookingError": { "placeholders": { "error": { "type": "String" } } },
+  "historyFilterCategoryHint": "Category",
+  "historyFilterAllCategories": "All",
+  "historyFilterPeriodAll": "All",
+  "historyFilterPeriodDay": "Day",
+  "historyFilterPeriodWeek": "Week",
+  "historyFilterPeriodMonth": "Month",
+
+  "historyError": "Error: {error}",
+  "@historyError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "historyNoResults": "No appointments found.",
+
+  "historySummaryAppointments": "Appointments",
+  "historySummaryTotal": "Total",
+  "historySummaryHours": "Hours",
+
+  "historyFallbackService": "Service",
+  "historyFallbackProvider": "Provider"
+    
 }

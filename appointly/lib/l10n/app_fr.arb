@@ -84,6 +84,61 @@
     "seeAllHistory": "Voir tout l'historique",
     "upcomingTab": "À venir",
     "completedTab": "Terminés",
-    "noAppointments": "Aucun rendez-vous disponible"
+    "noAppointments": "Aucun rendez-vous disponible",
+    "selectCategoryTitle": "Choisir une catégorie",
+  "categoriesHint": "Catégories",
+  "selectServiceTitle": "Choisir un service",
+  "servicesHint": "Services",
+  "selectProviderTitle": "Choisir un prestataire",
+  "providerHint": "Professionnel / Boutique",
+  "dateNotesTitle": "Date et notes",
+  "selectDateTime": "Choisir la date et l'heure",
+  "selectedDateTime": "Sélectionné : {datetime}",
+  "@selectedDateTime": { "placeholders": { "datetime": { "type": "String" } } },
+
+  "notesOptionalHint": "Notes (facultatif)",
+  "serviceDetailsTitle": "Détails du service",
+  "noDescription": "Aucune description disponible.",
+  "durationLabel": "Durée",
+  "minutesShort": "min",
+
+  "bookingPastTimeError": "Vous ne pouvez pas réserver à une heure déjà passée !",
+  "providerHoursError": "Horaires du prestataire : {start}:00 - {end}:00",
+  "@providerHoursError": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" }
+    }
+  },
+  "timeAlreadyBooked": "Ce créneau est déjà réservé ! Choisissez-en un autre.",
+  "availabilityCheckError": "Erreur de vérification de disponibilité : {error}",
+  "@availabilityCheckError": { "placeholders": { "error": { "type": "String" } } },
+
+  "confirmBooking": "Confirmer la réservation",
+  "bookingSuccess": "Réservation effectuée avec succès !",
+  "bookingError": "Erreur de réservation : {error}",
+  "@bookingError": { "placeholders": { "error": { "type": "String" } } },
+  "historyFilterCategoryHint": "Catégorie",
+  "historyFilterAllCategories": "Toutes",
+  "historyFilterPeriodAll": "Tout",
+  "historyFilterPeriodDay": "Jour",
+  "historyFilterPeriodWeek": "Semaine",
+  "historyFilterPeriodMonth": "Mois",
+
+  "historyError": "Erreur : {error}",
+  "@historyError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "historyNoResults": "Aucun rendez-vous trouvé.",
+
+  "historySummaryAppointments": "Rendez-vous",
+  "historySummaryTotal": "Total",
+  "historySummaryHours": "Heures",
+
+  "historyFallbackService": "Service",
+  "historyFallbackProvider": "Prestataire"
   }
   

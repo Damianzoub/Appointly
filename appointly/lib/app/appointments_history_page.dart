@@ -17,7 +17,6 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   final _auth = FirebaseAuth.instance;
 
   String? _selectedCategoryId;
-  // Φιλτράρισμα περιόδου: All, Day, Week, Month (όπως στην home_page)
   String _selectedPeriod = 'All';
   int tabIndex = 0; // 0 = upcoming, 1 = completed
 
@@ -56,6 +55,8 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   }
 
   Widget _buildFilters() {
+    final t = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
@@ -68,15 +69,18 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
                 return DropdownButton<String>(
                   isExpanded: true,
                   value: _selectedCategoryId,
-                  hint: const Text("Κατηγορία"),
+                  hint: Text(t.historyFilterCategoryHint),
                   underline: const SizedBox(),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text("Όλες")),
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text(t.historyFilterAllCategories),
+                    ),
                     if (snapshot.hasData)
                       ...snapshot.data!.docs.map(
                         (doc) => DropdownMenuItem(
                           value: doc.id,
-                          child: Text(doc['name'] ?? ""),
+                          child: Text((doc['name'] ?? "").toString()),
                         ),
                       ),
                   ],
@@ -91,11 +95,23 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
               isExpanded: true,
               value: _selectedPeriod,
               underline: const SizedBox(),
-              items: const [
-                DropdownMenuItem(value: 'All', child: Text("Όλα")),
-                DropdownMenuItem(value: 'Day', child: Text("Ημέρα")),
-                DropdownMenuItem(value: 'Week', child: Text("Εβδομάδα")),
-                DropdownMenuItem(value: 'Month', child: Text("Μήνας")),
+              items: [
+                DropdownMenuItem(
+                  value: 'All',
+                  child: Text(t.historyFilterPeriodAll),
+                ),
+                DropdownMenuItem(
+                  value: 'Day',
+                  child: Text(t.historyFilterPeriodDay),
+                ),
+                DropdownMenuItem(
+                  value: 'Week',
+                  child: Text(t.historyFilterPeriodWeek),
+                ),
+                DropdownMenuItem(
+                  value: 'Month',
+                  child: Text(t.historyFilterPeriodMonth),
+                ),
               ],
               onChanged: (val) => setState(() => _selectedPeriod = val!),
             ),
@@ -146,16 +162,22 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   }
 
   Widget _buildAppointmentsList(String uid) {
+    final t = AppLocalizations.of(context)!;
+
     return StreamBuilder<QuerySnapshot>(
       stream: _db
           .collection("appointments")
           .where("userId", isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError)
-          return Center(child: Text("Error: ${snapshot.error}"));
-        if (!snapshot.hasData)
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(t.historyError(snapshot.error.toString())),
+          );
+        }
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
 
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
@@ -169,18 +191,15 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           final date = (data['dateTime'] as Timestamp).toDate();
           final appointmentDay = DateTime(date.year, date.month, date.day);
 
-          // Διαχωρισμός Upcoming / Completed
           bool isPast = date.isBefore(now);
           if (tabIndex == 0 && isPast) return false;
           if (tabIndex == 1 && !isPast) return false;
 
-          // Φίλτρο Κατηγορίας
           if (_selectedCategoryId != null &&
               data['categoryId'] != _selectedCategoryId) {
             return false;
           }
 
-          // Λογική Φιλτραρίσματος Περιόδου (όπως στην home_page)
           if (_selectedPeriod == 'Day') {
             if (appointmentDay != today) return false;
           } else if (_selectedPeriod == 'Week') {
@@ -200,43 +219,35 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           return true;
         }).toList();
 
-        // Ταξινόμηση
         filteredDocs.sort((a, b) {
           final dateA =
               (a.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
           final dateB =
               (b.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
-          return tabIndex == 0
-              ? dateA.compareTo(dateB) // Στα μελλοντικά, το πιο κοντινό πρώτο
-              : dateB.compareTo(
-                  dateA,
-                ); // Στα ολοκληρωμένα, το πιο πρόσφατο πρώτο
+          return tabIndex == 0 ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
         });
 
-        // Υπολογισμός Συνόλων
         double totalCost = 0;
         double totalMinutes = 0;
 
         for (var doc in filteredDocs) {
           final data = doc.data() as Map<String, dynamic>;
           totalCost += (data['cost'] ?? 0).toDouble();
-
-          final duration = (data['duration'] ?? 0).toDouble();
-          totalMinutes += duration;
+          totalMinutes += (data['duration'] ?? 0).toDouble();
         }
 
         if (filteredDocs.isEmpty) {
-          return const Center(child: Text("Δεν βρέθηκαν ραντεβού."));
+          return Center(child: Text(t.historyNoResults));
         }
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           children: [
-            _buildSummaryCard(filteredDocs.length, totalCost, totalMinutes),
+            _buildSummaryCard(t, filteredDocs.length, totalCost, totalMinutes),
             const SizedBox(height: 16),
             ...filteredDocs.map(
               (doc) =>
-                  _buildAppointmentCard(doc.data() as Map<String, dynamic>),
+                  _buildAppointmentCard(t, doc.data() as Map<String, dynamic>),
             ),
           ],
         );
@@ -244,7 +255,12 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
-  Widget _buildSummaryCard(int count, double cost, double minutes) {
+  Widget _buildSummaryCard(
+    AppLocalizations t,
+    int count,
+    double cost,
+    double minutes,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -257,9 +273,9 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _summaryItem("Ραντεβού", count.toString()),
-          _summaryItem("Σύνολο", "${cost.toStringAsFixed(0)}€"),
-          _summaryItem("Ώρες", "${(minutes / 60).toStringAsFixed(1)}h"),
+          _summaryItem(t.historySummaryAppointments, count.toString()),
+          _summaryItem(t.historySummaryTotal, "${cost.toStringAsFixed(0)}€"),
+          _summaryItem(t.historySummaryHours, "${(minutes / 60).toStringAsFixed(1)}h"),
         ],
       ),
     );
@@ -284,7 +300,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
-  Widget _buildAppointmentCard(Map<String, dynamic> data) {
+  Widget _buildAppointmentCard(AppLocalizations t, Map<String, dynamic> data) {
     final date = (data['dateTime'] as Timestamp).toDate();
     final formatted = DateFormat('dd/MM/yyyy HH:mm').format(date);
 
@@ -307,11 +323,11 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  data['serviceName'] ?? "Υπηρεσία",
+                  (data['serviceName'] ?? t.historyFallbackService).toString(),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  data['providerName'] ?? "Πάροχος",
+                  (data['providerName'] ?? t.historyFallbackProvider).toString(),
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
                 Text(
@@ -326,7 +342,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
             ),
           ),
           Text(
-            "${data['cost'] ?? 0}€",
+            "${(data['cost'] ?? 0)}€",
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],

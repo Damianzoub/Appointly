@@ -161,7 +161,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noProvidersForService => 'No se encontraron profesionales para este servicio.';
 
   @override
-  String get selectDateTime => 'Seleccionar fecha y hora';
+  String get selectDateTime => 'Selecciona fecha y hora';
 
   @override
   String get notes => 'Notas';
@@ -173,11 +173,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get confirmBooking => 'Confirmar reserva';
 
   @override
-  String get bookingSuccess => '¡La reserva se completó correctamente!';
+  String get bookingSuccess => '¡Reserva completada con éxito!';
 
   @override
   String bookingError(String error) {
-    return 'Error al reservar: $error';
+    return 'Error de reserva: $error';
   }
 
   @override
@@ -197,4 +197,102 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noAppointments => 'No hay citas disponibles';
+
+  @override
+  String get selectCategoryTitle => 'Selecciona categoría';
+
+  @override
+  String get categoriesHint => 'Categorías';
+
+  @override
+  String get selectServiceTitle => 'Selecciona servicio';
+
+  @override
+  String get servicesHint => 'Servicios';
+
+  @override
+  String get selectProviderTitle => 'Selecciona proveedor';
+
+  @override
+  String get providerHint => 'Profesional / Tienda';
+
+  @override
+  String get dateNotesTitle => 'Fecha y notas';
+
+  @override
+  String selectedDateTime(String datetime) {
+    return 'Seleccionado: $datetime';
+  }
+
+  @override
+  String get notesOptionalHint => 'Notas (opcional)';
+
+  @override
+  String get serviceDetailsTitle => 'Detalles del servicio';
+
+  @override
+  String get noDescription => 'No hay descripción disponible.';
+
+  @override
+  String get durationLabel => 'Duración';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get bookingPastTimeError => '¡No puedes reservar una cita en una hora pasada!';
+
+  @override
+  String providerHoursError(int start, int end) {
+    return 'Horario del proveedor: $start:00 - $end:00';
+  }
+
+  @override
+  String get timeAlreadyBooked => '¡Esta hora ya está reservada! Elige otra.';
+
+  @override
+  String availabilityCheckError(String error) {
+    return 'Error al comprobar disponibilidad: $error';
+  }
+
+  @override
+  String get historyFilterCategoryHint => 'Categoría';
+
+  @override
+  String get historyFilterAllCategories => 'Todas';
+
+  @override
+  String get historyFilterPeriodAll => 'Todo';
+
+  @override
+  String get historyFilterPeriodDay => 'Día';
+
+  @override
+  String get historyFilterPeriodWeek => 'Semana';
+
+  @override
+  String get historyFilterPeriodMonth => 'Mes';
+
+  @override
+  String historyError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get historyNoResults => 'No se encontraron citas.';
+
+  @override
+  String get historySummaryAppointments => 'Citas';
+
+  @override
+  String get historySummaryTotal => 'Total';
+
+  @override
+  String get historySummaryHours => 'Horas';
+
+  @override
+  String get historyFallbackService => 'Servicio';
+
+  @override
+  String get historyFallbackProvider => 'Proveedor';
 }

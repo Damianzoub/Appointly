@@ -197,4 +197,102 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get noAppointments => 'Δεν υπάρχουν ραντεβού';
+
+  @override
+  String get selectCategoryTitle => 'Επιλέξτε Κατηγορία';
+
+  @override
+  String get categoriesHint => 'Κατηγορίες';
+
+  @override
+  String get selectServiceTitle => 'Επιλέξτε Υπηρεσία';
+
+  @override
+  String get servicesHint => 'Υπηρεσίες';
+
+  @override
+  String get selectProviderTitle => 'Επιλέξτε Πάροχο';
+
+  @override
+  String get providerHint => 'Επαγγελματίας / Κατάστημα';
+
+  @override
+  String get dateNotesTitle => 'Ημερομηνία & Σημειώσεις';
+
+  @override
+  String selectedDateTime(String datetime) {
+    return 'Επιλεγμένο: $datetime';
+  }
+
+  @override
+  String get notesOptionalHint => 'Σημειώσεις (προαιρετικά)';
+
+  @override
+  String get serviceDetailsTitle => 'Λεπτομέρειες Υπηρεσίας';
+
+  @override
+  String get noDescription => 'Δεν υπάρχει περιγραφή διαθέσιμη.';
+
+  @override
+  String get durationLabel => 'Διάρκεια';
+
+  @override
+  String get minutesShort => 'λεπ';
+
+  @override
+  String get bookingPastTimeError => 'Δεν μπορείτε να κλείσετε ραντεβού σε ώρα που έχει περάσει!';
+
+  @override
+  String providerHoursError(int start, int end) {
+    return 'Ωράριο παρόχου: $start:00 - $end:00';
+  }
+
+  @override
+  String get timeAlreadyBooked => 'Αυτή η ώρα είναι ήδη κλεισμένη! Επιλέξτε άλλη.';
+
+  @override
+  String availabilityCheckError(String error) {
+    return 'Σφάλμα ελέγχου διαθεσιμότητας: $error';
+  }
+
+  @override
+  String get historyFilterCategoryHint => 'Κατηγορία';
+
+  @override
+  String get historyFilterAllCategories => 'Όλες';
+
+  @override
+  String get historyFilterPeriodAll => 'Όλα';
+
+  @override
+  String get historyFilterPeriodDay => 'Ημέρα';
+
+  @override
+  String get historyFilterPeriodWeek => 'Εβδομάδα';
+
+  @override
+  String get historyFilterPeriodMonth => 'Μήνας';
+
+  @override
+  String historyError(String error) {
+    return 'Σφάλμα: $error';
+  }
+
+  @override
+  String get historyNoResults => 'Δεν βρέθηκαν ραντεβού.';
+
+  @override
+  String get historySummaryAppointments => 'Ραντεβού';
+
+  @override
+  String get historySummaryTotal => 'Σύνολο';
+
+  @override
+  String get historySummaryHours => 'Ώρες';
+
+  @override
+  String get historyFallbackService => 'Υπηρεσία';
+
+  @override
+  String get historyFallbackProvider => 'Πάροχος';
 }

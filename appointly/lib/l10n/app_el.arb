@@ -85,5 +85,59 @@
   "seeAllHistory": "Δείτε όλο το ιστορικό",
   "upcomingTab": "Επερχόμενα",
   "completedTab": "Ολοκληρωμένα",
-  "noAppointments": "Δεν υπάρχουν ραντεβού"
+  "noAppointments": "Δεν υπάρχουν ραντεβού",
+  "selectCategoryTitle": "Επιλέξτε Κατηγορία",
+  "categoriesHint": "Κατηγορίες",
+  "selectServiceTitle": "Επιλέξτε Υπηρεσία",
+  "servicesHint": "Υπηρεσίες",
+  "selectProviderTitle": "Επιλέξτε Πάροχο",
+  "providerHint": "Επαγγελματίας / Κατάστημα",
+  "dateNotesTitle": "Ημερομηνία & Σημειώσεις",
+  "selectDateTime": "Επιλέξτε Ημερομηνία & Ώρα",
+  "selectedDateTime": "Επιλεγμένο: {datetime}",
+  "@selectedDateTime": { "placeholders": { "datetime": { "type": "String" } } },
+
+  "notesOptionalHint": "Σημειώσεις (προαιρετικά)",
+  "serviceDetailsTitle": "Λεπτομέρειες Υπηρεσίας",
+  "noDescription": "Δεν υπάρχει περιγραφή διαθέσιμη.",
+  "durationLabel": "Διάρκεια",
+  "minutesShort": "λεπ",
+
+  "bookingPastTimeError": "Δεν μπορείτε να κλείσετε ραντεβού σε ώρα που έχει περάσει!",
+  "providerHoursError": "Ωράριο παρόχου: {start}:00 - {end}:00",
+  "@providerHoursError": {
+    "placeholders": {
+      "start": { "type": "int" },
+      "end": { "type": "int" }
+    }
+  },
+  "timeAlreadyBooked": "Αυτή η ώρα είναι ήδη κλεισμένη! Επιλέξτε άλλη.",
+  "availabilityCheckError": "Σφάλμα ελέγχου διαθεσιμότητας: {error}",
+  "@availabilityCheckError": { "placeholders": { "error": { "type": "String" } } },
+
+  "confirmBooking": "Επιβεβαίωση Κράτησης",
+  "bookingSuccess": "Η κράτηση ολοκληρώθηκε με επιτυχία!",
+  "bookingError": "Σφάλμα κατά την κράτηση: {error}",
+  "historyFilterCategoryHint": "Κατηγορία",
+  "historyFilterAllCategories": "Όλες",
+  "historyFilterPeriodAll": "Όλα",
+  "historyFilterPeriodDay": "Ημέρα",
+  "historyFilterPeriodWeek": "Εβδομάδα",
+  "historyFilterPeriodMonth": "Μήνας",
+
+  "historyError": "Σφάλμα: {error}",
+  "@historyError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "historyNoResults": "Δεν βρέθηκαν ραντεβού.",
+
+  "historySummaryAppointments": "Ραντεβού",
+  "historySummaryTotal": "Σύνολο",
+  "historySummaryHours": "Ώρες",
+
+  "historyFallbackService": "Υπηρεσία",
+  "historyFallbackProvider": "Πάροχος"
 }

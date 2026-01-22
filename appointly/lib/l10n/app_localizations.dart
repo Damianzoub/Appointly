@@ -472,6 +472,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No appointments available'**
   String get noAppointments;
+
+  /// No description provided for @selectCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get selectCategoryTitle;
+
+  /// No description provided for @categoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categoriesHint;
+
+  /// No description provided for @selectServiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select service'**
+  String get selectServiceTitle;
+
+  /// No description provided for @servicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get servicesHint;
+
+  /// No description provided for @selectProviderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select provider'**
+  String get selectProviderTitle;
+
+  /// No description provided for @providerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional / Store'**
+  String get providerHint;
+
+  /// No description provided for @dateNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & notes'**
+  String get dateNotesTitle;
+
+  /// No description provided for @selectedDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {datetime}'**
+  String selectedDateTime(String datetime);
+
+  /// No description provided for @notesOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get notesOptionalHint;
+
+  /// No description provided for @serviceDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service details'**
+  String get serviceDetailsTitle;
+
+  /// No description provided for @noDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description available.'**
+  String get noDescription;
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get durationLabel;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesShort;
+
+  /// No description provided for @bookingPastTimeError.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t book an appointment in a past time!'**
+  String get bookingPastTimeError;
+
+  /// No description provided for @providerHoursError.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider hours: {start}:00 - {end}:00'**
+  String providerHoursError(int start, int end);
+
+  /// No description provided for @timeAlreadyBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'This time slot is already booked! Choose another one.'**
+  String get timeAlreadyBooked;
+
+  /// No description provided for @availabilityCheckError.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability check error: {error}'**
+  String availabilityCheckError(String error);
+
+  /// No description provided for @historyFilterCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get historyFilterCategoryHint;
+
+  /// No description provided for @historyFilterAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get historyFilterAllCategories;
+
+  /// No description provided for @historyFilterPeriodAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get historyFilterPeriodAll;
+
+  /// No description provided for @historyFilterPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get historyFilterPeriodDay;
+
+  /// No description provided for @historyFilterPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get historyFilterPeriodWeek;
+
+  /// No description provided for @historyFilterPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get historyFilterPeriodMonth;
+
+  /// No description provided for @historyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String historyError(String error);
+
+  /// No description provided for @historyNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No appointments found.'**
+  String get historyNoResults;
+
+  /// No description provided for @historySummaryAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get historySummaryAppointments;
+
+  /// No description provided for @historySummaryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get historySummaryTotal;
+
+  /// No description provided for @historySummaryHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get historySummaryHours;
+
+  /// No description provided for @historyFallbackService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get historyFallbackService;
+
+  /// No description provided for @historyFallbackProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get historyFallbackProvider;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

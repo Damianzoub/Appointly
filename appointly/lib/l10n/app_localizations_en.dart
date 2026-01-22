@@ -197,4 +197,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAppointments => 'No appointments available';
+
+  @override
+  String get selectCategoryTitle => 'Select category';
+
+  @override
+  String get categoriesHint => 'Categories';
+
+  @override
+  String get selectServiceTitle => 'Select service';
+
+  @override
+  String get servicesHint => 'Services';
+
+  @override
+  String get selectProviderTitle => 'Select provider';
+
+  @override
+  String get providerHint => 'Professional / Store';
+
+  @override
+  String get dateNotesTitle => 'Date & notes';
+
+  @override
+  String selectedDateTime(String datetime) {
+    return 'Selected: $datetime';
+  }
+
+  @override
+  String get notesOptionalHint => 'Notes (optional)';
+
+  @override
+  String get serviceDetailsTitle => 'Service details';
+
+  @override
+  String get noDescription => 'No description available.';
+
+  @override
+  String get durationLabel => 'Duration';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get bookingPastTimeError => 'You can\'t book an appointment in a past time!';
+
+  @override
+  String providerHoursError(int start, int end) {
+    return 'Provider hours: $start:00 - $end:00';
+  }
+
+  @override
+  String get timeAlreadyBooked => 'This time slot is already booked! Choose another one.';
+
+  @override
+  String availabilityCheckError(String error) {
+    return 'Availability check error: $error';
+  }
+
+  @override
+  String get historyFilterCategoryHint => 'Category';
+
+  @override
+  String get historyFilterAllCategories => 'All';
+
+  @override
+  String get historyFilterPeriodAll => 'All';
+
+  @override
+  String get historyFilterPeriodDay => 'Day';
+
+  @override
+  String get historyFilterPeriodWeek => 'Week';
+
+  @override
+  String get historyFilterPeriodMonth => 'Month';
+
+  @override
+  String historyError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get historyNoResults => 'No appointments found.';
+
+  @override
+  String get historySummaryAppointments => 'Appointments';
+
+  @override
+  String get historySummaryTotal => 'Total';
+
+  @override
+  String get historySummaryHours => 'Hours';
+
+  @override
+  String get historyFallbackService => 'Service';
+
+  @override
+  String get historyFallbackProvider => 'Provider';
 }

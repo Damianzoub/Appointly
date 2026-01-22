@@ -161,7 +161,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noProvidersForService => 'Aucun professionnel trouvé pour ce service.';
 
   @override
-  String get selectDateTime => 'Sélectionner la date et l\'heure';
+  String get selectDateTime => 'Choisir la date et l\'heure';
 
   @override
   String get notes => 'Notes';
@@ -177,7 +177,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String bookingError(String error) {
-    return 'Erreur lors de la réservation : $error';
+    return 'Erreur de réservation : $error';
   }
 
   @override
@@ -197,4 +197,102 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noAppointments => 'Aucun rendez-vous disponible';
+
+  @override
+  String get selectCategoryTitle => 'Choisir une catégorie';
+
+  @override
+  String get categoriesHint => 'Catégories';
+
+  @override
+  String get selectServiceTitle => 'Choisir un service';
+
+  @override
+  String get servicesHint => 'Services';
+
+  @override
+  String get selectProviderTitle => 'Choisir un prestataire';
+
+  @override
+  String get providerHint => 'Professionnel / Boutique';
+
+  @override
+  String get dateNotesTitle => 'Date et notes';
+
+  @override
+  String selectedDateTime(String datetime) {
+    return 'Sélectionné : $datetime';
+  }
+
+  @override
+  String get notesOptionalHint => 'Notes (facultatif)';
+
+  @override
+  String get serviceDetailsTitle => 'Détails du service';
+
+  @override
+  String get noDescription => 'Aucune description disponible.';
+
+  @override
+  String get durationLabel => 'Durée';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get bookingPastTimeError => 'Vous ne pouvez pas réserver à une heure déjà passée !';
+
+  @override
+  String providerHoursError(int start, int end) {
+    return 'Horaires du prestataire : $start:00 - $end:00';
+  }
+
+  @override
+  String get timeAlreadyBooked => 'Ce créneau est déjà réservé ! Choisissez-en un autre.';
+
+  @override
+  String availabilityCheckError(String error) {
+    return 'Erreur de vérification de disponibilité : $error';
+  }
+
+  @override
+  String get historyFilterCategoryHint => 'Catégorie';
+
+  @override
+  String get historyFilterAllCategories => 'Toutes';
+
+  @override
+  String get historyFilterPeriodAll => 'Tout';
+
+  @override
+  String get historyFilterPeriodDay => 'Jour';
+
+  @override
+  String get historyFilterPeriodWeek => 'Semaine';
+
+  @override
+  String get historyFilterPeriodMonth => 'Mois';
+
+  @override
+  String historyError(String error) {
+    return 'Erreur : $error';
+  }
+
+  @override
+  String get historyNoResults => 'Aucun rendez-vous trouvé.';
+
+  @override
+  String get historySummaryAppointments => 'Rendez-vous';
+
+  @override
+  String get historySummaryTotal => 'Total';
+
+  @override
+  String get historySummaryHours => 'Heures';
+
+  @override
+  String get historyFallbackService => 'Service';
+
+  @override
+  String get historyFallbackProvider => 'Prestataire';
 }

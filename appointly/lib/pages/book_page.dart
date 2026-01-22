@@ -33,6 +33,7 @@ class _BookPageState extends State<BookPage> {
   }
 
   Future<void> _pickDateTime() async {
+    final t = AppLocalizations.of(context)!;
     if (_selectedProviderId == null) return;
 
     try {
@@ -76,9 +77,9 @@ class _BookPageState extends State<BookPage> {
       if (fullDateTime.isBefore(DateTime.now())) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+             SnackBar(
               content: Text(
-                "Δεν μπορείτε να κλείσετε ραντεβού σε ώρα που έχει περάσει!",
+                t.bookingPastTimeError,
               ),
               backgroundColor: Colors.orange,
             ),
@@ -91,7 +92,7 @@ class _BookPageState extends State<BookPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Ο πάροχος λειτουργεί $startHour:00 - $endHour:00"),
+              content: Text(t.providerHoursError(startHour.toInt(), endHour.toInt())),
               backgroundColor: Colors.orange,
             ),
           );
@@ -109,8 +110,8 @@ class _BookPageState extends State<BookPage> {
       if (conflictQuery.docs.isNotEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Αυτή η ώρα είναι ήδη κλεισμένη! Επιλέξτε άλλη."),
+             SnackBar(
+              content: Text(t.timeAlreadyBooked),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -124,13 +125,14 @@ class _BookPageState extends State<BookPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Σφάλμα κατά τον έλεγχο διαθεσιμότητας: $e")),
+          SnackBar(content: Text(t.availabilityCheckError(e.toString()))),
         );
       }
     }
   }
 
   Future<void> _confirmBooking() async {
+    final t = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || _selectedDateTime == null) return;
 
@@ -158,8 +160,8 @@ class _BookPageState extends State<BookPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Η κράτηση ολοκληρώθηκε με επιτυχία!"),
+           SnackBar(
+            content: Text(t.bookingSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -168,7 +170,7 @@ class _BookPageState extends State<BookPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Σφάλμα: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text(t.bookingError(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -195,7 +197,7 @@ class _BookPageState extends State<BookPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader("1", "Επιλέξτε Κατηγορία"),
+            _buildSectionHeader("1", t.selectCategoryTitle),
             const SizedBox(height: 12),
             _buildModernCard(
               child: StreamBuilder<QuerySnapshot>(
@@ -212,7 +214,7 @@ class _BookPageState extends State<BookPage> {
                       ),
                     ),
                     value: _selectedCategoryId,
-                    hint: const Text("Κατηγορίες"),
+                    hint:  Text(t.categoriesHint),
                     items: snapshot.data!.docs.map((doc) {
                       final data = doc.data() as Map<String, dynamic>;
                       return DropdownMenuItem<String>(
@@ -243,7 +245,7 @@ class _BookPageState extends State<BookPage> {
             ),
             const SizedBox(height: 24),
             if (_selectedCategoryId != null) ...[
-              _buildSectionHeader("2", "Επιλέξτε Υπηρεσία"),
+              _buildSectionHeader("2", t.selectServiceTitle),
               const SizedBox(height: 12),
               _buildModernCard(
                 child: StreamBuilder<QuerySnapshot>(
@@ -264,7 +266,7 @@ class _BookPageState extends State<BookPage> {
                         ),
                       ),
                       value: _selectedServiceId,
-                      hint: const Text("Υπηρεσίες"),
+                      hint: Text(t.servicesHint),
                       items: snapshot.data!.docs.map((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         return DropdownMenuItem<String>(
@@ -297,7 +299,7 @@ class _BookPageState extends State<BookPage> {
             ],
             const SizedBox(height: 24),
             if (_selectedServiceId != null) ...[
-              _buildSectionHeader("3", "Επιλέξτε Πάροχο"),
+              _buildSectionHeader("3", t.selectProviderTitle),
               const SizedBox(height: 12),
               _buildModernCard(
                 child: StreamBuilder<QuerySnapshot>(
@@ -318,7 +320,7 @@ class _BookPageState extends State<BookPage> {
                         ),
                       ),
                       value: _selectedProviderId,
-                      hint: const Text("Επαγγελματίας / Κατάστημα"),
+                      hint: Text(t.providerHint),
                       items: snapshot.data!.docs.map((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         return DropdownMenuItem<String>(
@@ -346,7 +348,7 @@ class _BookPageState extends State<BookPage> {
             ],
             const SizedBox(height: 24),
             if (_selectedProviderId != null) ...[
-              _buildSectionHeader("4", "Ημερομηνία & Σημειώσεις"),
+              _buildSectionHeader("4", t.dateNotesTitle),
               const SizedBox(height: 12),
               _buildModernCard(
                 child: Column(
@@ -359,16 +361,16 @@ class _BookPageState extends State<BookPage> {
                       ),
                       title: Text(
                         _selectedDateTime == null
-                            ? "Επιλέξτε Ημερομηνία & Ώρα"
-                            : "Επιλεγμένο: ${DateFormat('dd/MM/yyyy HH:mm').format(_selectedDateTime!)}",
+                            ? t.selectDateTime
+                            : t.selectedDateTime(DateFormat('dd/MM/yyyy HH:mm').format(_selectedDateTime!)),
                       ),
                       onTap: _pickDateTime,
                     ),
                     const Divider(),
                     TextField(
                       controller: _notesController,
-                      decoration: const InputDecoration(
-                        hintText: "Σημειώσεις (προαιρετικά)",
+                      decoration:  InputDecoration(
+                        hintText: t.notesOptionalHint,
                         border: InputBorder.none,
                       ),
                     ),
@@ -388,7 +390,7 @@ class _BookPageState extends State<BookPage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text("Επιβεβαίωση Κράτησης"),
+                child: Text(t.confirmBooking),
               ),
             ),
           ],
@@ -398,6 +400,7 @@ class _BookPageState extends State<BookPage> {
   }
 
   Widget _buildDetailsCard() {
+    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -409,13 +412,13 @@ class _BookPageState extends State<BookPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Λεπτομέρειες Υπηρεσίας",
+           Text(
+            t.serviceDetailsTitle,
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
           ),
           const SizedBox(height: 8),
           Text(
-            _selectedServiceData?['description'] ?? 'Δεν υπάρχει περιγραφή.',
+            _selectedServiceData?['description'] ?? t.noDescription,
             style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
           const SizedBox(height: 12),
@@ -424,7 +427,7 @@ class _BookPageState extends State<BookPage> {
               const Icon(Icons.timer_outlined, size: 18, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                "Διάρκεια: ${_selectedServiceData?['minDuration'] ?? 0}-${_selectedServiceData?['maxDuration'] ?? 0} λεπτά",
+                "${t.durationLabel}: ${_selectedServiceData?['minDuration'] ?? 0}-${_selectedServiceData?['maxDuration'] ?? 0} ${t.minutesShort}",
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
