@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointly/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-// Ορισμός των διαθέσιμων φίλτρων
 enum AppointmentFilter { all, day, week, month }
 
 class HomePage extends StatefulWidget {
@@ -18,13 +17,25 @@ class _HomePageState extends State<HomePage> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Κατάσταση του επιλεγμένου φίλτρου
   AppointmentFilter _activeFilter = AppointmentFilter.all;
 
-  // Μέθοδος ακύρωσης ραντεβού (ενημέρωση status)
+  String _getTranslated(
+    Map<String, dynamic> data,
+    String fieldKey,
+    String lang,
+    String fallback,
+  ) {
+    final mapField = data['${fieldKey}Map'];
+    if (mapField is Map) {
+      return mapField[lang]?.toString() ??
+          mapField['en']?.toString() ??
+          fallback;
+    }
+    return data[fieldKey]?.toString() ?? fallback;
+  }
+
   Future<void> _cancelAppointment(String docId) async {
     final t = AppLocalizations.of(context)!;
-
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -47,7 +58,6 @@ class _HomePageState extends State<HomePage> {
       await _db.collection('appointments').doc(docId).update({
         'status': 'cancelled',
       });
-      // Προσθήκη μηνύματος επιβεβαίωσης
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -59,12 +69,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Helper για σύγκριση ημερομηνιών
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  // Μέθοδος επεξεργασίας ραντεβού (αλλαγή ημερομηνίας/ώρας)
   Future<void> _editAppointment(String docId, DateTime currentDate) async {
     final newDate = await showDatePicker(
       context: context,
@@ -74,16 +82,12 @@ class _HomePageState extends State<HomePage> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
     );
-
     if (newDate == null) return;
-
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(currentDate),
     );
-
     if (time == null) return;
-
     final finalDateTime = DateTime(
       newDate.year,
       newDate.month,
@@ -91,7 +95,6 @@ class _HomePageState extends State<HomePage> {
       time.hour,
       time.minute,
     );
-
     await _db.collection('appointments').doc(docId).update({
       'dateTime': Timestamp.fromDate(finalDateTime),
     });
@@ -116,27 +119,31 @@ class _HomePageState extends State<HomePage> {
         actions: [
           PopupMenuButton<AppointmentFilter>(
             icon: const Icon(Icons.filter_list_rounded),
-            onSelected: (filter) {
-              setState(() {
-                _activeFilter = filter;
-              });
-            },
+            onSelected: (filter) => setState(() => _activeFilter = filter),
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: AppointmentFilter.all,
-                child: Text("Όλα"),
+                child: Text(
+                  t.historyFilterPeriodAll,
+                ), // Μετάφραση: Όλα [cite: 16]
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: AppointmentFilter.day,
-                child: Text("Ανά ημέρα"),
+                child: Text(
+                  t.historyFilterPeriodDay,
+                ), // Μετάφραση: Ημέρα [cite: 16]
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: AppointmentFilter.week,
-                child: Text("Ανά εβδομάδα"),
+                child: Text(
+                  t.historyFilterPeriodWeek,
+                ), // Μετάφραση: Εβδομάδα [cite: 16]
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: AppointmentFilter.month,
-                child: Text("Ανά μήνα"),
+                child: Text(
+                  t.historyFilterPeriodMonth,
+                ), // Μετάφραση: Μήνας [cite: 16]
               ),
             ],
           ),
@@ -151,22 +158,16 @@ class _HomePageState extends State<HomePage> {
                   .where('status', isEqualTo: 'active')
                   .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting)
                   return const Center(child: CircularProgressIndicator());
-                }
-
                 final allDocs = snapshot.data?.docs ?? [];
                 final now = DateTime.now();
 
-                // Φιλτράρισμα Client-side για αποφυγή σύνθετων Indexes
                 final filteredDocs = allDocs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final dt = (data['dateTime'] as Timestamp).toDate();
-
-                  // Μόνο μελλοντικά
                   if (dt.isBefore(now.subtract(const Duration(minutes: 10))))
                     return false;
-
                   switch (_activeFilter) {
                     case AppointmentFilter.day:
                       return _isSameDay(dt, now);
@@ -179,7 +180,6 @@ class _HomePageState extends State<HomePage> {
                   }
                 }).toList();
 
-                // Ταξινόμηση
                 filteredDocs.sort((a, b) {
                   final dateA =
                       (a.data() as Map<String, dynamic>)['dateTime']
@@ -190,9 +190,7 @@ class _HomePageState extends State<HomePage> {
                   return dateA.compareTo(dateB);
                 });
 
-                if (filteredDocs.isEmpty) {
-                  return _buildEmptyState(context, t);
-                }
+                if (filteredDocs.isEmpty) return _buildEmptyState(context, t);
 
                 final todaysDocs = filteredDocs
                     .where(
@@ -251,8 +249,6 @@ class _HomePageState extends State<HomePage> {
             ),
     );
   }
-
-  // --- UI Helper Widgets (Διατήρηση Γραφικών) ---
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations t) {
     return Center(
@@ -331,11 +327,11 @@ class _HomePageState extends State<HomePage> {
     required Map<String, dynamic> data,
     required DateTime date,
   }) {
-    final serviceName = (data['serviceName'] ?? '').toString();
-    final providerName = (data['providerName'] ?? '').toString();
-    final categoryName = (data['categoryName'] ?? '').toString();
+    final lang = Localizations.localeOf(context).languageCode;
+    final serviceName = _getTranslated(data, 'serviceName', lang, 'Service');
+    final providerName = _getTranslated(data, 'providerName', lang, 'Provider');
+    final categoryName = _getTranslated(data, 'categoryName', lang, '');
     final notes = (data['notes'] ?? '').toString();
-
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final formatted = DateFormat('dd MMM yyyy • HH:mm', localeTag).format(date);
 
@@ -448,8 +444,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-
-                      // ΠΡΟΣΘΗΚΗ: Εμφάνιση σημειώσεων με ειδικό πλαίσιο
                       if (notes.trim().isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Container(
@@ -485,7 +479,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ],
-
                       const Divider(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,

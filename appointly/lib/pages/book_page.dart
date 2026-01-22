@@ -22,6 +22,7 @@ class _BookPageState extends State<BookPage> {
 
   String? _selectedProviderId;
   String? _selectedProviderName;
+  Map<String, dynamic>? _selectedProviderData;
 
   DateTime? _selectedDateTime;
   final TextEditingController _notesController = TextEditingController();
@@ -30,6 +31,15 @@ class _BookPageState extends State<BookPage> {
   void dispose() {
     _notesController.dispose();
     super.dispose();
+  }
+
+  String _getTranslated(dynamic field, String lang, String fallback) {
+    if (field == null) return fallback;
+    if (field is String) return field;
+    if (field is Map) {
+      return field[lang]?.toString() ?? field['en']?.toString() ?? fallback;
+    }
+    return fallback;
   }
 
   Future<void> _pickDateTime() async {
@@ -77,10 +87,8 @@ class _BookPageState extends State<BookPage> {
       if (fullDateTime.isBefore(DateTime.now())) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-              content: Text(
-                t.bookingPastTimeError,
-              ),
+            SnackBar(
+              content: Text(t.bookingPastTimeError),
               backgroundColor: Colors.orange,
             ),
           );
@@ -92,7 +100,9 @@ class _BookPageState extends State<BookPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(t.providerHoursError(startHour.toInt(), endHour.toInt())),
+              content: Text(
+                t.providerHoursError(startHour.toInt(), endHour.toInt()),
+              ),
               backgroundColor: Colors.orange,
             ),
           );
@@ -110,7 +120,7 @@ class _BookPageState extends State<BookPage> {
       if (conflictQuery.docs.isNotEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
+            SnackBar(
               content: Text(t.timeAlreadyBooked),
               backgroundColor: Colors.redAccent,
             ),
@@ -137,7 +147,6 @@ class _BookPageState extends State<BookPage> {
     if (user == null || _selectedDateTime == null) return;
 
     try {
-      // Υπολογισμός μέσης διάρκειας από τα δεδομένα του service
       final minD = (_selectedServiceData?['minDuration'] ?? 0) as num;
       final maxD = (_selectedServiceData?['maxDuration'] ?? 0) as num;
       final double averageDuration = (minD + maxD) / 2;
@@ -145,13 +154,16 @@ class _BookPageState extends State<BookPage> {
       await _db.collection('appointments').add({
         'userId': user.uid,
         'categoryId': _selectedCategoryId,
-        'categoryName': _selectedCategoryName,
+        'categoryNameMap':
+            _selectedServiceData?['categoryName'] ??
+            {'el': _selectedCategoryName},
         'serviceId': _selectedServiceId,
-        'serviceName': _selectedServiceData?['name'] ?? 'Άγνωστη Υπηρεσία',
+        'serviceNameMap': _selectedServiceData?['name'],
         'providerId': _selectedProviderId,
-        'providerName': _selectedProviderName,
+        'providerNameMap':
+            _selectedProviderData?['name'] ?? {'el': _selectedProviderName},
         'cost': _selectedServiceData?['cost'] ?? 0,
-        'duration': averageDuration, // Αποθήκευση του μέσου χρόνου
+        'duration': averageDuration,
         'dateTime': Timestamp.fromDate(_selectedDateTime!),
         'notes': _notesController.text.trim(),
         'status': 'active',
@@ -160,7 +172,7 @@ class _BookPageState extends State<BookPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
+          SnackBar(
             content: Text(t.bookingSuccess),
             backgroundColor: Colors.green,
           ),
@@ -170,7 +182,10 @@ class _BookPageState extends State<BookPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.bookingError(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(t.bookingError(e.toString())),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -179,6 +194,7 @@ class _BookPageState extends State<BookPage> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -214,12 +230,14 @@ class _BookPageState extends State<BookPage> {
                       ),
                     ),
                     value: _selectedCategoryId,
-                    hint:  Text(t.categoriesHint),
+                    hint: Text(t.categoriesHint),
                     items: snapshot.data!.docs.map((doc) {
                       final data = doc.data() as Map<String, dynamic>;
                       return DropdownMenuItem<String>(
                         value: doc.id,
-                        child: Text(data['name'] ?? 'Χωρίς Όνομα'),
+                        child: Text(
+                          _getTranslated(data['name'], lang, 'Category'),
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -228,14 +246,17 @@ class _BookPageState extends State<BookPage> {
                       );
                       final selectedData =
                           selectedDoc.data() as Map<String, dynamic>;
-
                       setState(() {
                         _selectedCategoryId = val;
-                        _selectedCategoryName =
-                            selectedData['name'] ?? 'Εκπαίδευση';
+                        _selectedCategoryName = _getTranslated(
+                          selectedData['name'],
+                          lang,
+                          'Category',
+                        );
                         _selectedServiceId = null;
                         _selectedServiceData = null;
                         _selectedProviderId = null;
+                        _selectedProviderName = null;
                         _selectedDateTime = null;
                       });
                     },
@@ -269,11 +290,14 @@ class _BookPageState extends State<BookPage> {
                       hint: Text(t.servicesHint),
                       items: snapshot.data!.docs.map((doc) {
                         final data = doc.data() as Map<String, dynamic>;
+                        final name = _getTranslated(
+                          data['name'],
+                          lang,
+                          'Service',
+                        );
                         return DropdownMenuItem<String>(
                           value: doc.id,
-                          child: Text(
-                            "${data['name'] ?? 'Υπηρεσία'} • ${data['cost'] ?? 0}€",
-                          ),
+                          child: Text("$name • ${data['cost'] ?? 0}€"),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -285,6 +309,7 @@ class _BookPageState extends State<BookPage> {
                           _selectedServiceData =
                               doc.data() as Map<String, dynamic>;
                           _selectedProviderId = null;
+                          _selectedProviderName = null;
                           _selectedDateTime = null;
                         });
                       },
@@ -305,11 +330,25 @@ class _BookPageState extends State<BookPage> {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _db
                       .collection('providers')
-                      .where('serviceIds', whereIn: [_selectedServiceId])
+                      .where('serviceIds', isEqualTo: _selectedServiceId)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData)
                       return const LinearProgressIndicator();
+
+                    if (snapshot.data!.docs.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          t.noProvidersForService,
+                          style: TextStyle(
+                            color: Colors.red[400],
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    }
+
                     return DropdownButtonFormField<String>(
                       isExpanded: true,
                       decoration: const InputDecoration(
@@ -325,19 +364,24 @@ class _BookPageState extends State<BookPage> {
                         final data = doc.data() as Map<String, dynamic>;
                         return DropdownMenuItem<String>(
                           value: doc.id,
-                          child: Text(data['name'] ?? 'Πάροχος'),
+                          child: Text(
+                            _getTranslated(data['name'], lang, 'Provider'),
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
                         final selectedDoc = snapshot.data!.docs.firstWhere(
                           (d) => d.id == val,
                         );
-                        final selectedData =
-                            selectedDoc.data() as Map<String, dynamic>;
                         setState(() {
                           _selectedProviderId = val;
-                          _selectedProviderName =
-                              selectedData['name'] ?? 'Πάροχος';
+                          _selectedProviderData =
+                              selectedDoc.data() as Map<String, dynamic>;
+                          _selectedProviderName = _getTranslated(
+                            _selectedProviderData?['name'],
+                            lang,
+                            'Provider',
+                          );
                           _selectedDateTime = null;
                         });
                       },
@@ -362,14 +406,18 @@ class _BookPageState extends State<BookPage> {
                       title: Text(
                         _selectedDateTime == null
                             ? t.selectDateTime
-                            : t.selectedDateTime(DateFormat('dd/MM/yyyy HH:mm').format(_selectedDateTime!)),
+                            : t.selectedDateTime(
+                                DateFormat(
+                                  'dd/MM/yyyy HH:mm',
+                                ).format(_selectedDateTime!),
+                              ),
                       ),
                       onTap: _pickDateTime,
                     ),
                     const Divider(),
                     TextField(
                       controller: _notesController,
-                      decoration:  InputDecoration(
+                      decoration: InputDecoration(
                         hintText: t.notesOptionalHint,
                         border: InputBorder.none,
                       ),
@@ -401,6 +449,7 @@ class _BookPageState extends State<BookPage> {
 
   Widget _buildDetailsCard() {
     final t = AppLocalizations.of(context)!;
+    final lang = Localizations.localeOf(context).languageCode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -412,13 +461,20 @@ class _BookPageState extends State<BookPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Text(
+          Text(
             t.serviceDetailsTitle,
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.indigo,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            _selectedServiceData?['description'] ?? t.noDescription,
+            _getTranslated(
+              _selectedServiceData?['description'],
+              lang,
+              t.noDescription,
+            ),
             style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
           const SizedBox(height: 12),

@@ -20,6 +20,24 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   String _selectedPeriod = 'All';
   int tabIndex = 0; // 0 = upcoming, 1 = completed
 
+  // Helper συνάρτηση για ασφαλή ανάκτηση μεταφρασμένου κειμένου
+  String _getTranslated(
+    Map<String, dynamic> data,
+    String fieldKey,
+    String lang,
+    String fallback,
+  ) {
+    // Προσπάθεια ανάγνωσης από το Map των μεταφράσεων (π.χ. serviceNameMap)
+    final mapField = data['${fieldKey}Map'];
+    if (mapField is Map) {
+      return mapField[lang]?.toString() ??
+          mapField['en']?.toString() ??
+          fallback;
+    }
+    // Fallback στο απλό String πεδίο (για παλιά ραντεβού)
+    return data[fieldKey]?.toString() ?? fallback;
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -56,6 +74,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
 
   Widget _buildFilters() {
     final t = AppLocalizations.of(context)!;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -77,12 +96,17 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
                       child: Text(t.historyFilterAllCategories),
                     ),
                     if (snapshot.hasData)
-                      ...snapshot.data!.docs.map(
-                        (doc) => DropdownMenuItem(
+                      ...snapshot.data!.docs.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        // Δυναμική μετάφραση ονόματος κατηγορίας στο φίλτρο
+                        final name = data['name'] is Map
+                            ? (data['name'][lang] ?? data['name']['en'] ?? "")
+                            : (data['name'] ?? "").toString();
+                        return DropdownMenuItem(
                           value: doc.id,
-                          child: Text((doc['name'] ?? "").toString()),
-                        ),
-                      ),
+                          child: Text(name),
+                        );
+                      }),
                   ],
                   onChanged: (val) => setState(() => _selectedCategoryId = val),
                 );
@@ -171,9 +195,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Text(t.historyError(snapshot.error.toString())),
-          );
+          return Center(child: Text(t.historyError(snapshot.error.toString())));
         }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -224,7 +246,9 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
               (a.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
           final dateB =
               (b.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
-          return tabIndex == 0 ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+          return tabIndex == 0
+              ? dateA.compareTo(dateB)
+              : dateB.compareTo(dateA);
         });
 
         double totalCost = 0;
@@ -275,7 +299,10 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
         children: [
           _summaryItem(t.historySummaryAppointments, count.toString()),
           _summaryItem(t.historySummaryTotal, "${cost.toStringAsFixed(0)}€"),
-          _summaryItem(t.historySummaryHours, "${(minutes / 60).toStringAsFixed(1)}h"),
+          _summaryItem(
+            t.historySummaryHours,
+            "${(minutes / 60).toStringAsFixed(1)}h",
+          ),
         ],
       ),
     );
@@ -301,8 +328,24 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
   }
 
   Widget _buildAppointmentCard(AppLocalizations t, Map<String, dynamic> data) {
+    final lang = Localizations.localeOf(context).languageCode;
     final date = (data['dateTime'] as Timestamp).toDate();
     final formatted = DateFormat('dd/MM/yyyy HH:mm').format(date);
+
+    // Δυναμική μετάφραση με χρήση των Maps
+    final serviceName = _getTranslated(
+      data,
+      'serviceName',
+      lang,
+      t.historyFallbackService,
+    );
+    final providerName = _getTranslated(
+      data,
+      'providerName',
+      lang,
+      t.historyFallbackProvider,
+    );
+    final categoryName = _getTranslated(data, 'categoryName', lang, '');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -322,12 +365,22 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (categoryName.isNotEmpty)
+                  Text(
+                    categoryName.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.indigo,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 Text(
-                  (data['serviceName'] ?? t.historyFallbackService).toString(),
+                  serviceName,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  (data['providerName'] ?? t.historyFallbackProvider).toString(),
+                  providerName,
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
                 Text(
