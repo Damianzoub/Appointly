@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointly/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
+// Ορισμός των διαθέσιμων φίλτρων
 enum AppointmentFilter { all, day, week, month }
 
 class HomePage extends StatefulWidget {
@@ -17,8 +18,10 @@ class _HomePageState extends State<HomePage> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Κατάσταση του επιλεγμένου φίλτρου
   AppointmentFilter _activeFilter = AppointmentFilter.all;
 
+  // Helper συνάρτηση για ασφαλή ανάκτηση μεταφρασμένου κειμένου
   String _getTranslated(
     Map<String, dynamic> data,
     String fieldKey,
@@ -34,8 +37,10 @@ class _HomePageState extends State<HomePage> {
     return data[fieldKey]?.toString() ?? fallback;
   }
 
+  // Μέθοδος ακύρωσης και οριστικής διαγραφής από τη βάση
   Future<void> _cancelAppointment(String docId) async {
     final t = AppLocalizations.of(context)!;
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -55,16 +60,22 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (confirm == true) {
-      await _db.collection('appointments').doc(docId).update({
-        'status': 'cancelled',
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Το ραντεβού ακυρώθηκε επιτυχώς"),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+      try {
+        await _db.collection('appointments').doc(docId).delete();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Το ραντεβού ακυρώθηκε και διαγράφηκε επιτυχώς"),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Σφάλμα κατά τη διαγραφή: $e")),
+          );
+        }
       }
     }
   }
@@ -123,27 +134,19 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: AppointmentFilter.all,
-                child: Text(
-                  t.historyFilterPeriodAll,
-                ), // Μετάφραση: Όλα [cite: 16]
+                child: Text(t.historyFilterPeriodAll),
               ),
               PopupMenuItem(
                 value: AppointmentFilter.day,
-                child: Text(
-                  t.historyFilterPeriodDay,
-                ), // Μετάφραση: Ημέρα [cite: 16]
+                child: Text(t.historyFilterPeriodDay),
               ),
               PopupMenuItem(
                 value: AppointmentFilter.week,
-                child: Text(
-                  t.historyFilterPeriodWeek,
-                ), // Μετάφραση: Εβδομάδα [cite: 16]
+                child: Text(t.historyFilterPeriodWeek),
               ),
               PopupMenuItem(
                 value: AppointmentFilter.month,
-                child: Text(
-                  t.historyFilterPeriodMonth,
-                ), // Μετάφραση: Μήνας [cite: 16]
+                child: Text(t.historyFilterPeriodMonth),
               ),
             ],
           ),
@@ -166,8 +169,10 @@ class _HomePageState extends State<HomePage> {
                 final filteredDocs = allDocs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final dt = (data['dateTime'] as Timestamp).toDate();
-                  if (dt.isBefore(now.subtract(const Duration(minutes: 10))))
+                  // Εμφανίζουμε και τα περασμένα ραντεβού (έως 10 λεπτά πριν) για να φαίνονται ως γκρι
+                  if (dt.isBefore(now.subtract(const Duration(days: 365))))
                     return false;
+
                   switch (_activeFilter) {
                     case AppointmentFilter.day:
                       return _isSameDay(dt, now);
@@ -202,10 +207,30 @@ class _HomePageState extends State<HomePage> {
                     .toList();
                 final upcomingDocs = filteredDocs
                     .where(
-                      (d) => !_isSameDay(
-                        (d.data() as Map<String, dynamic>)['dateTime'].toDate(),
-                        now,
-                      ),
+                      (d) =>
+                          (d.data() as Map<String, dynamic>)['dateTime']
+                              .toDate()
+                              .isAfter(now) &&
+                          !_isSameDay(
+                            (d.data() as Map<String, dynamic>)['dateTime']
+                                .toDate(),
+                            now,
+                          ),
+                    )
+                    .toList();
+
+                // Συμπεριλαμβάνουμε τα περασμένα στη λίστα για να φαίνονται γκρι
+                final pastDocs = filteredDocs
+                    .where(
+                      (d) =>
+                          (d.data() as Map<String, dynamic>)['dateTime']
+                              .toDate()
+                              .isBefore(now) &&
+                          !_isSameDay(
+                            (d.data() as Map<String, dynamic>)['dateTime']
+                                .toDate(),
+                            now,
+                          ),
                     )
                     .toList();
 
@@ -227,10 +252,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 24),
                     ],
-                    if (upcomingDocs.isNotEmpty) ...[
+                    if (upcomingDocs.isNotEmpty || pastDocs.isNotEmpty) ...[
                       _buildSectionTitle(t.upcomingAppointments),
                       const SizedBox(height: 12),
                       ...upcomingDocs.map(
+                        (doc) => _buildAppointmentCard(
+                          context: context,
+                          t: t,
+                          id: doc.id,
+                          data: doc.data() as Map<String, dynamic>,
+                          date: (doc.data() as Map<String, dynamic>)['dateTime']
+                              .toDate(),
+                        ),
+                      ),
+                      ...pastDocs.map(
                         (doc) => _buildAppointmentCard(
                           context: context,
                           t: t,
@@ -328,6 +363,10 @@ class _HomePageState extends State<HomePage> {
     required DateTime date,
   }) {
     final lang = Localizations.localeOf(context).languageCode;
+
+    // Έλεγχος αν το ραντεβού έχει περάσει
+    final bool isPast = date.isBefore(DateTime.now());
+
     final serviceName = _getTranslated(data, 'serviceName', lang, 'Service');
     final providerName = _getTranslated(data, 'providerName', lang, 'Provider');
     final categoryName = _getTranslated(data, 'categoryName', lang, '');
@@ -350,164 +389,192 @@ class _HomePageState extends State<HomePage> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Container(width: 6, color: Colors.indigo),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
+        child: Opacity(
+          // Γκρι εμφάνιση αν έχει περάσει
+          opacity: isPast ? 0.6 : 1.0,
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 6,
+                  color: isPast ? Colors.grey : Colors.indigo,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (categoryName.isNotEmpty)
+                                    Text(
+                                      categoryName.toUpperCase(),
+                                      style: TextStyle(
+                                        color: isPast
+                                            ? Colors.grey
+                                            : Colors.indigo,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  Text(
+                                    serviceName,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: isPast
+                                          ? Colors.grey[700]
+                                          : Colors.black,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isPast
+                                    ? Colors.grey.withOpacity(0.1)
+                                    : Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "${data['cost'] ?? 0}€",
+                                style: TextStyle(
+                                  color: isPast ? Colors.grey : Colors.green,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.person_outline,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                providerName,
+                                style: const TextStyle(color: Colors.grey),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              formatted,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (notes.trim().isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.amber.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (categoryName.isNotEmpty)
-                                  Text(
-                                    categoryName.toUpperCase(),
+                                const Icon(
+                                  Icons.sticky_note_2_outlined,
+                                  size: 16,
+                                  color: Colors.orange,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    notes,
                                     style: const TextStyle(
-                                      color: Colors.indigo,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                      letterSpacing: 1,
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                Text(
-                                  serviceName,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              "${data['cost'] ?? 0}€",
-                              style: const TextStyle(
-                                color: Colors.green,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.person_outline,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              providerName,
-                              style: const TextStyle(color: Colors.grey),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            formatted,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (notes.trim().isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.amber.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                        // Απόκρυψη κουμπιών αν το ραντεβού έχει περάσει
+                        if (!isPast) ...[
+                          const Divider(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              const Icon(
-                                Icons.sticky_note_2_outlined,
-                                size: 16,
-                                color: Colors.orange,
+                              TextButton.icon(
+                                onPressed: () => _editAppointment(id, date),
+                                icon: const Icon(Icons.edit_outlined, size: 18),
+                                label: Text(t.change),
                               ),
                               const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  notes,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.black87,
-                                  ),
+                              TextButton.icon(
+                                onPressed: () => _cancelAppointment(id),
+                                icon: const Icon(
+                                  Icons.close,
+                                  size: 18,
+                                  color: Colors.red,
+                                ),
+                                label: Text(
+                                  t.cancelAppointment,
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                      const Divider(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () => _editAppointment(id, date),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: Text(t.change),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton.icon(
-                            onPressed: () => _cancelAppointment(id),
-                            icon: const Icon(
-                              Icons.close,
-                              size: 18,
-                              color: Colors.red,
-                            ),
-                            label: Text(
-                              t.cancelAppointment,
-                              style: const TextStyle(color: Colors.red),
+                        ] else ...[
+                          const SizedBox(height: 12),
+                          const Text(
+                            "Ολοκληρωμένο / Περασμένο",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
                             ),
                           ),
                         ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
