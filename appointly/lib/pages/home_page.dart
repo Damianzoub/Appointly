@@ -560,9 +560,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ] else ...[
                           const SizedBox(height: 12),
-                          const Text(
-                            "Ολοκληρωμένο / Περασμένο",
-                            style: TextStyle(
+                          // Χρησιμοποιούμε τη μετάφραση αντί για στατικό κείμενο
+                          Text(
+                            t.pastAppointment,
+                            style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
                               fontStyle: FontStyle.italic,

@@ -295,4 +295,7 @@ class AppLocalizationsEl extends AppLocalizations {
 
   @override
   String get historyFallbackProvider => 'Πάροχος';
+
+  @override
+  String get pastAppointment => 'Ολοκληρωμένο / Περασμένο';
 }

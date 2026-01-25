@@ -652,6 +652,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Provider'**
   String get historyFallbackProvider;
+
+  /// No description provided for @pastAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed / Past'**
+  String get pastAppointment;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

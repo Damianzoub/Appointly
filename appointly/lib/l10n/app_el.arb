@@ -139,5 +139,7 @@
   "historySummaryHours": "Ώρες",
 
   "historyFallbackService": "Υπηρεσία",
-  "historyFallbackProvider": "Πάροχος"
+  "historyFallbackProvider": "Πάροχος",
+
+  "pastAppointment": "Ολοκληρωμένο / Περασμένο"
 }

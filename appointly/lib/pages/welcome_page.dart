@@ -24,13 +24,13 @@ class WelcomePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   const Text(
-                    "Καλώς ήρθατε στο Appointly",
+                    "Welcome to Appointly",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "Ο ευκολότερος τρόπος να κλείνετε τα ραντεβού σας.",
+                    "The easiest way to book your appointments.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
@@ -39,7 +39,7 @@ class WelcomePage extends StatelessWidget {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () {
-                        // Πλοήγηση στην ΚΑΝΟΝΙΚΗ σελίδα Login
+                        // Navigate to STANDARD Login page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -47,7 +47,7 @@ class WelcomePage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text("Σύνδεση"),
+                      child: const Text("Login"),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -55,7 +55,7 @@ class WelcomePage extends StatelessWidget {
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () {
-                        // Πλοήγηση στην ΚΑΝΟΝΙΚΗ σελίδα Signup
+                        // Navigate to STANDARD Signup page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -63,7 +63,7 @@ class WelcomePage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text("Δημιουργία Λογαριασμού"),
+                      child: const Text("Create Account"),
                     ),
                   ),
                 ],

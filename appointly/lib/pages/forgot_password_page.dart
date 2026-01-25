@@ -11,7 +11,7 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>(); // Προσθήκη FormKey για validation
+  final _formKey = GlobalKey<FormState>(); // Added FormKey for validation
   bool _isLoading = false;
   bool _emailSent = false;
 
@@ -21,7 +21,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  // Μέθοδος εμφάνισης μηνυμάτων (SnackBar)
+  // Method to show messages (SnackBar)
   void _showMsg(String msg, {bool isError = true}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -34,33 +34,31 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _handleResetPassword() async {
-    // 1. Έλεγχος εγκυρότητας φόρμας
+    // 1. Form validation check
     if (!_formKey.currentState!.validate()) return;
 
     final email = _emailController.text.trim();
     setState(() => _isLoading = true);
 
     try {
-      // 2. Αποστολή email μέσω Firebase
+      // 2. Send email via Firebase
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       if (mounted) {
         setState(() => _emailSent = true);
-        _showMsg("Ο σύνδεσμος επαναφοράς στάλθηκε!", isError: false);
       }
     } on FirebaseAuthException catch (e) {
-      // 3. Εξειδικευμένη διαχείριση σφαλμάτων Firebase
-      String errorMessage = "Παρουσιάστηκε σφάλμα";
+      String errorMessage = "An error occurred. Please try again.";
+
       if (e.code == 'user-not-found') {
-        errorMessage = "Δεν βρέθηκε χρήστης με αυτό το email.";
+        errorMessage = "No user found with this email.";
       } else if (e.code == 'invalid-email') {
-        errorMessage = "Η διεύθυνση email δεν είναι έγκυρη.";
-      } else if (e.code == 'too-many-requests') {
-        errorMessage = "Πολλά αιτήματα. Δοκιμάστε ξανά αργότερα.";
+        errorMessage = "The email address is not valid.";
       }
+
       _showMsg(errorMessage);
     } catch (e) {
-      _showMsg("Κάτι πήγε στραβά. Δοκιμάστε ξανά.");
+      _showMsg("Connection error. Check your internet.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -69,21 +67,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Επαναφορά Κωδικού"), centerTitle: true),
+      appBar: AppBar(title: const Text("Password Reset")),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
-          key: _formKey, // Σύνδεση με το FormKey
+          key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (!_emailSent) ...[
-                const Icon(Icons.lock_reset, size: 80, color: Colors.indigo),
+                const Icon(
+                  Icons.mail_lock_outlined,
+                  size: 80,
+                  color: Colors.indigo,
+                ),
                 const SizedBox(height: 24),
                 const Text(
-                  "Εισάγετε το email σας για να σας στείλουμε έναν σύνδεσμο επαναφοράς του κωδικού σας.",
+                  "Forgot your password?",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Enter your email and we will send you a link to reset it.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
@@ -91,24 +98,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: "Email",
-                    prefixIcon: Icon(Icons.email_outlined),
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
                   ),
-                  // Validation για κενό πεδίο και σωστό format
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Το email είναι απαραίτητο";
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(value)) {
-                      return "Εισάγετε ένα έγκυρο email";
-                    }
+                  validator: (v) {
+                    if (v == null || v.isEmpty)
+                      return "Please enter your email";
+                    if (!v.contains("@")) return "Invalid email format";
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 50,
                   child: FilledButton(
                     onPressed: _isLoading ? null : _handleResetPassword,
                     child: _isLoading
@@ -120,11 +123,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text("Αποστολή Συνδέσμου"),
+                        : const Text("Send Link"),
                   ),
                 ),
               ] else ...[
-                // UI Επιτυχίας
+                // Success UI
                 const Icon(
                   Icons.check_circle_outline,
                   color: Colors.green,
@@ -132,7 +135,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  "Ελέγξτε τα εισερχόμενά σας!\nΑκολουθήστε τον σύνδεσμο στο email για να αλλάξετε τον κωδικό σας.",
+                  "Check your inbox!\nFollow the link in the email to change your password.",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
@@ -141,14 +144,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Επιστροφή στη σύνδεση"),
+                    child: const Text("Back to login"),
                   ),
                 ),
               ],
               if (!_emailSent)
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Ακύρωση"),
+                  child: const Text("Cancel"),
                 ),
             ],
           ),

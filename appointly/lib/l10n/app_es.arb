@@ -139,6 +139,8 @@
   "historySummaryHours": "Horas",
 
   "historyFallbackService": "Servicio",
-  "historyFallbackProvider": "Proveedor"
+  "historyFallbackProvider": "Proveedor", 
+
+  "pastAppointment": "Completado / Pasado"
 }
   

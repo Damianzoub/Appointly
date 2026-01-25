@@ -2,7 +2,7 @@ import 'package:appointly/app.dart';
 import 'package:appointly/pages/forgot_password_page.dart';
 import 'package:appointly/pages/signup_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Απαραίτητο για το FirebaseAuthException
+import 'package:firebase_auth/firebase_auth.dart'; // Necessary for FirebaseAuthException
 
 class LoginPage extends StatefulWidget {
   static const route = "/login";
@@ -38,42 +38,41 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (mounted) {
-        // Αν η σελίδα login ανοίχτηκε με push, την κλείνουμε.
-        // Ο AuthWrapper θα αναλάβει να δείξει το HomeShell.
+        // If login page was opened with push, we close it.
+        // AuthWrapper will handle showing the HomeShell.
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Επιτυχής σύνδεση!"),
+            content: Text("Login successful!"),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
           ),
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Μετατροπή των κωδικών σφάλματος της Firebase σε φιλικά μηνύματα
+      // Convert Firebase error codes to friendly messages
       String friendlyMessage;
 
       switch (e.code) {
         case 'invalid-credential':
         case 'user-not-found':
         case 'wrong-password':
-          friendlyMessage = "Το email ή ο κωδικός πρόσβασης είναι λανθασμένα.";
+          friendlyMessage = "Incorrect email or password.";
           break;
         case 'invalid-email':
-          friendlyMessage = "Η διεύθυνση email δεν είναι έγκυρη.";
+          friendlyMessage = "The email address is not valid.";
           break;
         case 'user-disabled':
-          friendlyMessage = "Αυτός ο λογαριασμός έχει απενεργοποιηθεί.";
+          friendlyMessage = "This account has been disabled.";
           break;
         case 'too-many-requests':
-          friendlyMessage =
-              "Πολλές λανθασμένες προσπάθειες. Δοκιμάστε ξανά αργότερα.";
+          friendlyMessage = "Too many failed attempts. Please try again later.";
           break;
         default:
-          friendlyMessage = "Παρουσιάστηκε σφάλμα σύνδεσης. Δοκιμάστε ξανά.";
+          friendlyMessage = "A connection error occurred. Please try again.";
       }
 
       if (mounted) {
@@ -92,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά."),
+            content: Text("Something went wrong. Please try again."),
             backgroundColor: Colors.orange,
             behavior: SnackBarBehavior.floating,
           ),
@@ -106,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: "Σύνδεση",
+      title: "Login",
       child: Center(
         child: SingleChildScrollView(
           child: Form(
@@ -126,14 +125,15 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: "Email",
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (v) => (v ?? "").isEmpty ? "Εισάγετε email" : null,
+                  validator: (v) =>
+                      (v ?? "").isEmpty ? "Please enter email" : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscure,
                   decoration: InputDecoration(
-                    labelText: "Κωδικός πρόσβασης",
+                    labelText: "Password",
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       onPressed: () => setState(() => _obscure = !_obscure),
@@ -143,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   validator: (v) =>
-                      (v ?? "").isEmpty ? "Εισάγετε κωδικό" : null,
+                      (v ?? "").isEmpty ? "Please enter password" : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                         builder: (context) => const ForgotPasswordPage(),
                       ),
                     ),
-                    child: const Text("Ξεχάσατε τον κωδικό σας;"),
+                    child: const Text("Forgot your password?"),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -171,14 +171,14 @@ class _LoginPageState extends State<LoginPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text("Είσοδος"),
+                        : const Text("Login"),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Δεν έχετε λογαριασμό;"),
+                    const Text("Don't have an account?"),
                     TextButton(
                       onPressed: () => Navigator.pushReplacement(
                         context,
@@ -186,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => const SignupPage(),
                         ),
                       ),
-                      child: const Text("Εγγραφή"),
+                      child: const Text("Sign Up"),
                     ),
                   ],
                 ),

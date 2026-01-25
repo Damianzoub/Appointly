@@ -295,4 +295,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get historyFallbackProvider => 'Prestataire';
+
+  @override
+  String get pastAppointment => 'Terminé / Passé';
 }
