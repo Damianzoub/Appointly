@@ -1,7 +1,7 @@
 import 'package:appointly/pages/book_page.dart';
 import 'package:appointly/pages/home_page.dart';
 import 'package:appointly/pages/welcome_page.dart';
-import 'package:appointly/features/profile/ui/profile_page.dart';
+import 'package:appointly/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:appointly/l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Νέο

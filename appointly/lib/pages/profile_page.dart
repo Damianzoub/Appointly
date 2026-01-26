@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../../../app.dart';
-import '../../../language_provider.dart';
-import '../../../l10n/app_localizations.dart';
+import '../app.dart';
+import '../language_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -44,8 +44,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   String get _fullName {
-    final fName = _profileData?['firstName'] ?? _profileData?['name'] ?? '';
-    final lName = _profileData?['lastName'] ?? _profileData?['surname'] ?? '';
+    final fName = _profileData?['first_name'] ?? _profileData?['name'] ?? '';
+    final lName = _profileData?['last_name'] ?? _profileData?['surname'] ?? '';
 
     if (fName.isEmpty && lName.isEmpty) {
       return _firebaseAuth.currentUser?.displayName ?? "Χρήστης";
@@ -73,10 +73,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Προσθήκη προ-συμπλήρωσης για Όνομα και Επίθετο
     final nameCtrl = TextEditingController(
-      text: _profileData?['firstName'] ?? _profileData?['name'] ?? "",
+      text: _profileData?['first_name'] ?? _profileData?['name'] ?? "",
     );
     final lastNameCtrl = TextEditingController(
-      text: _profileData?['lastName'] ?? _profileData?['surname'] ?? "",
+      text: _profileData?['last_name'] ?? _profileData?['surname'] ?? "",
     );
     final usernameCtrl = TextEditingController(
       text: _profileData?['username'] ?? "",
@@ -163,8 +163,8 @@ class _ProfilePageState extends State<ProfilePage> {
             FilledButton(
               onPressed: () async {
                 await _db.collection('users').doc(user.uid).set({
-                  'firstName': nameCtrl.text.trim(),
-                  'lastName': lastNameCtrl.text.trim(),
+                  'first_name': nameCtrl.text.trim(),
+                  'last_name': lastNameCtrl.text.trim(),
                   'username': usernameCtrl.text.trim(),
                   'dob': selectedDob != null
                       ? Timestamp.fromDate(selectedDob!)

@@ -4,7 +4,6 @@ class UserProfile {
   final String lastname;
   final String email;
   final DateTime? dateOfBirth;
-  final String phoneNumber;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -14,7 +13,6 @@ class UserProfile {
     required this.lastname,
     required this.email,
     this.dateOfBirth,
-    required this.phoneNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,13 +21,12 @@ class UserProfile {
   factory UserProfile.fromMap(Map<String, dynamic> data) {
     return UserProfile(
       uid: data['id'] ?? '', // Στη Supabase συνήθως η στήλη λέγεται 'id'
-      firstname: data['firstname'] ?? '',
-      lastname: data['lastname'] ?? '',
+      firstname: data['first_name'] ?? '',
+      lastname: data['last_name'] ?? '',
       email: data['email'] ?? '',
       dateOfBirth: data['date_of_birth'] != null
           ? DateTime.parse(data['date_of_birth'])
           : null,
-      phoneNumber: data['phone_number'] ?? '',
       createdAt: DateTime.parse(data['created_at']),
       updatedAt: DateTime.parse(data['updated_at']),
     );
@@ -40,10 +37,9 @@ class UserProfile {
     return {
       // Το 'id' συνήθως δημιουργείται αυτόματα από τη βάση (UUID)
       "email": email,
-      "firstname": firstname,
-      "lastname": lastname,
+      "first_name": firstname,
+      "last_name": lastname,
       "date_of_birth": dateOfBirth?.toIso8601String(),
-      "phone_number": phoneNumber,
       "created_at": createdAt.toIso8601String(),
       "updated_at": updatedAt.toIso8601String(),
     };
