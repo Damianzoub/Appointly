@@ -35,6 +35,7 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  // Επιλογή ημερομηνίας γέννησης
   Future<void> _pickDob() async {
     final now = DateTime.now();
     final initial = _dob ?? DateTime(now.year - 18, now.month, now.day);
@@ -44,15 +45,12 @@ class _SignupPageState extends State<SignupPage> {
       firstDate: DateTime(1900),
       lastDate: now,
     );
-    if (picked != null) {
-      setState(() => _dob = picked);
-    }
+    if (picked != null) setState(() => _dob = picked);
   }
 
+  // Υποβολή εγγραφής
   Future<void> _submit() async {
-    // Form validation check
     if (!_formKey.currentState!.validate()) return;
-
     if (_dob == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -66,7 +64,7 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Call signup from AuthController (app.dart)
+      // Κλήση της μεθόδου εγγραφής από το κεντρικό controller
       await auth.signup(
         name: _nameCtrl.text.trim(),
         surname: _surnameCtrl.text.trim(),
@@ -77,7 +75,6 @@ class _SignupPageState extends State<SignupPage> {
       );
 
       if (mounted) {
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Account created successfully!"),
@@ -85,38 +82,31 @@ class _SignupPageState extends State<SignupPage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-
-        // IMMEDIATE REDIRECT:
-        // Clear history and go to home.
-        // AuthWrapper will see that the user is now logged in.
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
     } on FirebaseAuthException catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.message ?? "Registration error"),
             backgroundColor: Colors.red,
           ),
         );
-      }
     } catch (e) {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("An error occurred: ${e.toString()}"),
             backgroundColor: Colors.red,
           ),
         );
-      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  InputDecoration _inputStyle(String label, IconData icon) {
-    return InputDecoration(labelText: label, prefixIcon: Icon(icon, size: 22));
-  }
+  InputDecoration _inputStyle(String label, IconData icon) =>
+      InputDecoration(labelText: label, prefixIcon: Icon(icon, size: 22));
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +126,6 @@ class _SignupPageState extends State<SignupPage> {
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 32),
-
                 Row(
                   children: [
                     Expanded(
@@ -163,14 +152,12 @@ class _SignupPageState extends State<SignupPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _usernameCtrl,
                   decoration: _inputStyle("Username", Icons.alternate_email),
                   validator: (v) => (v ?? '').isEmpty ? "Required" : null,
                 ),
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
@@ -179,7 +166,6 @@ class _SignupPageState extends State<SignupPage> {
                       !(v ?? '').contains('@') ? "Invalid email" : null,
                 ),
                 const SizedBox(height: 16),
-
                 InkWell(
                   onTap: _pickDob,
                   borderRadius: BorderRadius.circular(12),
@@ -216,7 +202,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscure,
@@ -233,7 +218,6 @@ class _SignupPageState extends State<SignupPage> {
                       (v ?? '').length < 6 ? "At least 6 characters" : null,
                 ),
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _confirmPasswordCtrl,
                   obscureText: _confirmObscure,
@@ -254,7 +238,6 @@ class _SignupPageState extends State<SignupPage> {
                       v != _passwordCtrl.text ? "Passwords do not match" : null,
                 ),
                 const SizedBox(height: 32),
-
                 SizedBox(
                   height: 52,
                   child: FilledButton(

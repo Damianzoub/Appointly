@@ -4,26 +4,30 @@ import 'package:appointly/pages/welcome_page.dart';
 import 'package:appointly/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:appointly/l10n/app_localizations.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Νέο
-import 'package:cloud_firestore/cloud_firestore.dart'; // Νέο
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+// instance για τον έλεγχο της αυθεντικοποίησης
 final auth = AuthController();
 
 class AuthController extends ChangeNotifier {
   final _auth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
 
+  // Επιστρέφει true αν υπάρχει συνδεδεμένος χρήστης
   bool get isLoggedIn => _auth.currentUser != null;
 
   String get displayName => _auth.currentUser?.displayName ?? "User";
 
   String get email => _auth.currentUser?.email ?? "";
 
+  // Σύνδεση με email και κωδικό
   Future<void> login({required String email, required String password}) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
     notifyListeners();
   }
 
+  // Εγγραφή νέου χρήστη και δημιουργία προφίλ στο Firestore
   Future<void> signup({
     required String name,
     required String surname,
@@ -32,16 +36,16 @@ class AuthController extends ChangeNotifier {
     required String username,
     required String password,
   }) async {
-    // 1. Δημιουργία χρήστη
+    // 1. Δημιουργία λογαριασμού στο Firebase Auth
     UserCredential credential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-    // 2. Ενημέρωση Display Name στο Auth profile
+    // 2. Ενημέρωση του ονόματος στο προφίλ αυθεντικοποίησης
     await credential.user?.updateDisplayName("$name $surname");
 
-    // 3. Αποθήκευση στο Firestore (αντίστοιχο των profiles της Supabase)
+    // 3. Δημιουργία εγγράφου στη συλλογή 'users' για επιπλέον πληροφορίες
     await _db.collection('users').doc(credential.user!.uid).set({
       'first_name': name,
       'last_name': surname,
@@ -54,12 +58,14 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Έξοδος χρήστη
   void logout() async {
     await _auth.signOut();
     notifyListeners();
   }
 }
 
+// Widget που ελέγχει ποια σελίδα θα προβληθεί βάσει του Auth status
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -77,6 +83,7 @@ class AuthWrapper extends StatelessWidget {
   }
 }
 
+// Το κέλυφος της εφαρμογής με το κάτω μενού πλοήγησης
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -86,6 +93,7 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+  // Λίστα των κύριων σελίδων
   final _pages = const [HomePage(), BookPage(), ProfilePage()];
 
   @override
@@ -116,6 +124,7 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
+// Ενιαίο Scaffold για σελίδες όπως η Σύνδεση και η Εγγραφή
 class AppScaffold extends StatelessWidget {
   final String title;
   final Widget child;

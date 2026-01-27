@@ -17,6 +17,7 @@ class WelcomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Κεντρικό εικονίδιο εφαρμογής
                   const Icon(
                     Icons.calendar_month_rounded,
                     size: 100,
@@ -35,11 +36,11 @@ class WelcomePage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 60),
+                  // Κουμπί Σύνδεσης
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () {
-                        // Navigate to STANDARD Login page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -51,11 +52,11 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  // Κουμπί Εγγραφής
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () {
-                        // Navigate to STANDARD Signup page
                         Navigator.push(
                           context,
                           MaterialPageRoute(

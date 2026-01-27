@@ -15,17 +15,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // Instances Firebase.
   final _firebaseAuth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
+
+  // Τοπική αποθήκευση των δεδομένων προφίλ.
   Map<String, dynamic>? _profileData;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchProfile();
+    _fetchProfile(); // Φόρτωση δεδομένων κατά την εκκίνηση της σελίδας.
   }
 
+  /// Ανάκτηση του εγγράφου του χρήστη από τη συλλογή 'users' του Firestore.
   Future<void> _fetchProfile() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
@@ -43,6 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /// Συνδυάζει όνομα και επώνυμο για εμφάνιση στην κεφαλίδα.
   String get _fullName {
     final fName = _profileData?['first_name'] ?? _profileData?['name'] ?? '';
     final lName = _profileData?['last_name'] ?? _profileData?['surname'] ?? '';
@@ -53,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return "$fName $lName".trim();
   }
 
+  /// Μετατρέπει το πεδίο ημερομηνίας γέννησης σε αναγνώσιμη μορφή.
   String _formatDob(dynamic dob, AppLocalizations t) {
     if (dob == null) return t.notSet;
     try {
@@ -66,12 +72,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return t.notSet;
   }
 
+  /// Διάλογος που επιτρέπει στον χρήστη να επεξεργαστεί τα στοιχεία του.
   Future<void> _editProfileDialog() async {
-    final  t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context)!;
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
 
-    // Προσθήκη προ-συμπλήρωσης για Όνομα και Επίθετο
+    // Controllers για τα πεδία κειμένου.
     final nameCtrl = TextEditingController(
       text: _profileData?['first_name'] ?? _profileData?['name'] ?? "",
     );
@@ -84,11 +91,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     DateTime? selectedDob;
     var rawDob = _profileData?['dob'];
-    if (rawDob is Timestamp) {
+    if (rawDob is Timestamp)
       selectedDob = rawDob.toDate();
-    } else if (rawDob is String) {
+    else if (rawDob is String)
       selectedDob = DateTime.tryParse(rawDob);
-    }
 
     await showDialog(
       context: context,
@@ -97,9 +103,9 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title:  Text(
+          title: Text(
             t.editProfile,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -107,25 +113,25 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                     labelText: t.firstname,
-                    prefixIcon: Icon(Icons.person_outline),
+                    prefixIcon: const Icon(Icons.person_outline),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: lastNameCtrl,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                     labelText: t.lastname,
-                    prefixIcon: Icon(Icons.person_outline),
+                    prefixIcon: const Icon(Icons.person_outline),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: usernameCtrl,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                     labelText: t.username,
-                    prefixIcon: Icon(Icons.alternate_email),
+                    prefixIcon: const Icon(Icons.alternate_email),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -141,15 +147,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         : DateFormat('dd/MM/yyyy').format(selectedDob!),
                   ),
                   onTap: () async {
+                    // Επιλογή ημερομηνίας γέννησης.
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: selectedDob ?? DateTime(2000),
                       firstDate: DateTime(1920),
                       lastDate: DateTime.now(),
                     );
-                    if (picked != null) {
+                    if (picked != null)
                       setDialogState(() => selectedDob = picked);
-                    }
                   },
                 ),
               ],
@@ -162,6 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             FilledButton(
               onPressed: () async {
+                // Ενημέρωση Firestore και Firebase Auth προφίλ.
                 await _db.collection('users').doc(user.uid).set({
                   'first_name': nameCtrl.text.trim(),
                   'last_name': lastNameCtrl.text.trim(),
@@ -174,9 +181,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 await user.updateDisplayName(
                   "${nameCtrl.text.trim()} ${lastNameCtrl.text.trim()}",
                 );
-
                 if (mounted) Navigator.pop(ctx);
-                _fetchProfile();
+                _fetchProfile(); // Ανανέωση της σελίδας με τα νέα δεδομένα.
               },
               child: const Text("Αποθήκευση"),
             ),
@@ -191,6 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final t = AppLocalizations.of(context)!;
     final langProvider = Provider.of<LanguageProvider>(context);
 
+    // Διαθέσιμες γλώσσες για την εφαρμογή.
     final List<Map<String, String>> languages = [
       {'name': 'Ελληνικά', 'code': 'el', 'flag': '🇬🇷'},
       {'name': 'English', 'code': 'en', 'flag': '🇺🇸'},
@@ -222,6 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
           : ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               children: [
+                // Φωτογραφία προφίλ (Avatar).
                 Center(
                   child: Container(
                     decoration: BoxDecoration(
@@ -258,7 +266,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ),
-
                 const SizedBox(height: 32),
                 _buildSectionHeader(t.accountinfo),
                 const SizedBox(height: 12),
@@ -268,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildProfileItem(
                         Icons.cake_outlined,
                         t.dateofbirth,
-                        _formatDob(_profileData?['dob'],t),
+                        _formatDob(_profileData?['dob'], t),
                       ),
                       const Divider(height: 1),
                       _buildProfileItem(
@@ -279,10 +286,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
                 _buildSectionHeader(t.language),
                 const SizedBox(height: 12),
+                // Dropdown για αλλαγή γλώσσας μέσω του LanguageProvider.
                 _buildModernCard(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -300,26 +307,28 @@ class _ProfilePageState extends State<ProfilePage> {
                           Icons.keyboard_arrow_down_rounded,
                           color: Colors.indigo,
                         ),
-                        items: languages.map((lang) {
-                          return DropdownMenuItem<String>(
-                            value: lang['code'],
-                            child: Row(
-                              children: [
-                                Text(
-                                  lang['flag']!,
-                                  style: const TextStyle(fontSize: 20),
+                        items: languages
+                            .map(
+                              (lang) => DropdownMenuItem<String>(
+                                value: lang['code'],
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      lang['flag']!,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      lang['name']!,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  lang['name']!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (newCode) => newCode != null
                             ? langProvider.setLocale(Locale(newCode))
                             : null,
@@ -327,28 +336,31 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-                const SizedBox(height:24),
+                const SizedBox(height: 24),
                 _buildSectionHeader(t.appointmentHistory),
                 const SizedBox(height: 12),
-                _buildModernCard(child: ListTile(
-                  leading: Icon(Icons.history_rounded,color:Colors.indigo[400]),
-                  title: Text(
-                    t.appointmentHistory,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600
-                    ),),
+                // Σύνδεσμος για το ιστορικό ραντεβού.
+                _buildModernCard(
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.history_rounded,
+                      color: Colors.indigo[400],
+                    ),
+                    title: Text(
+                      t.appointmentHistory,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     subtitle: Text(
                       t.seeAll,
-                      style: TextStyle(color:Colors.grey[600]),
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: (){
-                      Navigator.pushNamed(context, '/appointments_history');
-                    },
-                  )
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/appointments_history'),
+                  ),
                 ),
-
                 const SizedBox(height: 32),
+                // Κουμπί αποσύνδεσης.
                 FilledButton.icon(
                   onPressed: () => _confirmLogout(context),
                   icon: const Icon(Icons.logout_rounded),
@@ -368,73 +380,72 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.indigo,
-        ),
+  /// Τίτλος ενότητας προφίλ.
+  Widget _buildSectionHeader(String title) => Padding(
+    padding: const EdgeInsets.only(left: 4),
+    child: Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.indigo,
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildModernCard({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+  /// Στυλιζαρισμένο πλαίσιο (Card).
+  Widget _buildModernCard({required Widget child}) => Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: child,
+  );
+
+  /// Μεμονωμένο στοιχείο πληροφορίας (π.χ. Email).
+  Widget _buildProfileItem(IconData icon, String label, String value) =>
+      ListTile(
+        leading: Icon(icon, color: Colors.indigo[400], size: 22),
+        title: Text(
+          label,
+          style: const TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+        subtitle: Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
           ),
-        ],
-      ),
-      child: child,
-    );
-  }
-
-  Widget _buildProfileItem(IconData icon, String label, String value) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.indigo[400], size: 22),
-      title: Text(
-        label,
-        style: const TextStyle(fontSize: 13, color: Colors.grey),
-      ),
-      subtitle: Text(
-        value,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
         ),
-      ),
-    );
-  }
+      );
 
+  /// Διάλογος επιβεβαίωσης αποσύνδεσης.
   void _confirmLogout(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title:  Text(t.logoutTitle),
-        content:  Text(t.logoutConfirm),
+        title: Text(t.logoutTitle),
+        content: Text(t.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child:  Text(t.cancel),
+            child: Text(t.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              await _firebaseAuth.signOut();
-              auth.logout();
+              await _firebaseAuth.signOut(); // Έξοδος από το Firebase Auth.
+              auth.logout(); // Καθαρισμός τοπικής κατάστασης.
               if (mounted) {
                 Navigator.of(ctx).pop();
                 Navigator.of(

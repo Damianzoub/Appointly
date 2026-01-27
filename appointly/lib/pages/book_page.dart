@@ -12,8 +12,10 @@ class BookPage extends StatefulWidget {
 }
 
 class _BookPageState extends State<BookPage> {
+  // Instance της βάσης δεδομένων Firestore για την επικοινωνία με τα δεδομένα.
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // Μεταβλητές αποθήκευσης των τρεχουσών επιλογών του χρήστη για τη ροή της κράτησης.
   String? _selectedCategoryId;
   String? _selectedCategoryName;
 
@@ -29,10 +31,12 @@ class _BookPageState extends State<BookPage> {
 
   @override
   void dispose() {
+    // Αποδέσμευση του controller για αποφυγή διαρροών μνήμης.
     _notesController.dispose();
     super.dispose();
   }
 
+  // Συνάρτηση μετάφρασης πεδίων από τη βάση, υποστηρίζοντας Maps ή Strings.
   String _getTranslated(dynamic field, String lang, String fallback) {
     if (field == null) return fallback;
     if (field is String) return field;
@@ -42,6 +46,7 @@ class _BookPageState extends State<BookPage> {
     return fallback;
   }
 
+  // Επιλογή Ημερομηνίας και Ώρας με ελέγχους για παρελθόντα χρόνο, ωράριο και διαθεσιμότητα.
   Future<void> _pickDateTime() async {
     final t = AppLocalizations.of(context)!;
     if (_selectedProviderId == null) return;
@@ -51,10 +56,10 @@ class _BookPageState extends State<BookPage> {
           .collection('providers')
           .doc(_selectedProviderId)
           .get();
-
       final data = provDoc.data();
       final workingHours = data?['workingHours'] as Map<String, dynamic>?;
 
+      // Ανάκτηση ωραρίου παρόχου (προεπιλογή 9:00 - 20:00).
       final startHour = workingHours?['start'] ?? 9;
       final endHour = workingHours?['end'] ?? 20;
 
@@ -64,7 +69,7 @@ class _BookPageState extends State<BookPage> {
         firstDate: DateTime.now(),
         lastDate: DateTime.now().add(const Duration(days: 60)),
         selectableDayPredicate: (DateTime val) =>
-            val.weekday != DateTime.sunday,
+            val.weekday != DateTime.sunday, // Αποκλεισμός Κυριακών.
       );
 
       if (date == null) return;
@@ -84,6 +89,7 @@ class _BookPageState extends State<BookPage> {
         time.minute,
       );
 
+      // Έλεγχος αν η ώρα είναι στο παρελθόν.
       if (fullDateTime.isBefore(DateTime.now())) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +102,7 @@ class _BookPageState extends State<BookPage> {
         return;
       }
 
+      // Έλεγχος αν η ώρα είναι εντός ωραρίου εργασίας του παρόχου.
       if (time.hour < startHour || time.hour >= endHour) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -110,6 +117,7 @@ class _BookPageState extends State<BookPage> {
         return;
       }
 
+      // Έλεγχος για υπάρχοντα ραντεβού (Conflict Check) στη βάση.
       final conflictQuery = await _db
           .collection('appointments')
           .where('providerId', isEqualTo: _selectedProviderId)
@@ -141,12 +149,14 @@ class _BookPageState extends State<BookPage> {
     }
   }
 
+  // Αποστολή και οριστικοποίηση της κράτησης στο Firestore.
   Future<void> _confirmBooking() async {
     final t = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || _selectedDateTime == null) return;
 
     try {
+      // Υπολογισμός μέσης διάρκειας για την αποθήκευση της κράτησης.
       final minD = (_selectedServiceData?['minDuration'] ?? 0) as num;
       final maxD = (_selectedServiceData?['maxDuration'] ?? 0) as num;
       final double averageDuration = (minD + maxD) / 2;
@@ -213,6 +223,7 @@ class _BookPageState extends State<BookPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Βήμα 1: Επιλογή Κατηγορίας.
             _buildSectionHeader("1", t.selectCategoryTitle),
             const SizedBox(height: 12),
             _buildModernCard(
@@ -265,6 +276,7 @@ class _BookPageState extends State<BookPage> {
               ),
             ),
             const SizedBox(height: 24),
+            // Βήμα 2: Επιλογή Υπηρεσίας.
             if (_selectedCategoryId != null) ...[
               _buildSectionHeader("2", t.selectServiceTitle),
               const SizedBox(height: 12),
@@ -318,11 +330,13 @@ class _BookPageState extends State<BookPage> {
                 ),
               ),
             ],
+            // Εμφάνιση λεπτομερειών υπηρεσίας αν έχει επιλεγεί.
             if (_selectedServiceData != null) ...[
               const SizedBox(height: 16),
               _buildDetailsCard(),
             ],
             const SizedBox(height: 24),
+            // Βήμα 3: Επιλογή Παρόχου.
             if (_selectedServiceId != null) ...[
               _buildSectionHeader("3", t.selectProviderTitle),
               const SizedBox(height: 12),
@@ -335,7 +349,6 @@ class _BookPageState extends State<BookPage> {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData)
                       return const LinearProgressIndicator();
-
                     if (snapshot.data!.docs.isEmpty) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -348,7 +361,6 @@ class _BookPageState extends State<BookPage> {
                         ),
                       );
                     }
-
                     return DropdownButtonFormField<String>(
                       isExpanded: true,
                       decoration: const InputDecoration(
@@ -391,6 +403,7 @@ class _BookPageState extends State<BookPage> {
               ),
             ],
             const SizedBox(height: 24),
+            // Βήμα 4: Επιλογή Ημερομηνίας/Ώρας και Σημειώσεων.
             if (_selectedProviderId != null) ...[
               _buildSectionHeader("4", t.dateNotesTitle),
               const SizedBox(height: 12),
@@ -427,6 +440,7 @@ class _BookPageState extends State<BookPage> {
               ),
             ],
             const SizedBox(height: 40),
+            // Κουμπί επιβεβαίωσης κράτησης.
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -447,6 +461,7 @@ class _BookPageState extends State<BookPage> {
     );
   }
 
+  // Widget εμφάνισης λεπτομερειών της επιλεγμένης υπηρεσίας (κόστος, διάρκεια).
   Widget _buildDetailsCard() {
     final t = AppLocalizations.of(context)!;
     final lang = Localizations.localeOf(context).languageCode;
@@ -505,6 +520,7 @@ class _BookPageState extends State<BookPage> {
     );
   }
 
+  // Widget επικεφαλίδας ενότητας με αριθμό βήματος.
   Widget _buildSectionHeader(String step, String title) {
     return Row(
       children: [
@@ -525,6 +541,7 @@ class _BookPageState extends State<BookPage> {
     );
   }
 
+  // Widget για ομοιόμορφα στυλιζαρισμένες κάρτες εισαγωγής.
   Widget _buildModernCard({required Widget child}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

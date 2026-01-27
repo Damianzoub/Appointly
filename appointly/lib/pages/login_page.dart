@@ -2,7 +2,7 @@ import 'package:appointly/app.dart';
 import 'package:appointly/pages/forgot_password_page.dart';
 import 'package:appointly/pages/signup_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Necessary for FirebaseAuthException
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   static const route = "/login";
@@ -26,9 +26,9 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // Διαδικασία υποβολής της σύνδεσης
   Future<void> _submit() async {
     if (!_formkey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     try {
@@ -38,12 +38,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (mounted) {
-        // If login page was opened with push, we close it.
-        // AuthWrapper will handle showing the HomeShell.
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
-
+        if (Navigator.canPop(context)) Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Login successful!"),
@@ -53,9 +48,8 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Convert Firebase error codes to friendly messages
+      // Μετατροπή τεχνικών σφαλμάτων σε κατανοητά μηνύματα
       String friendlyMessage;
-
       switch (e.code) {
         case 'invalid-credential':
         case 'user-not-found':

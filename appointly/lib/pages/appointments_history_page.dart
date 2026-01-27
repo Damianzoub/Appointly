@@ -13,28 +13,31 @@ class AppointmentsHistoryPage extends StatefulWidget {
 }
 
 class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
+  // --- Διαχείριση Δεδομένων & Κατάστασης ---
+
+  // Πρόσβαση στις υπηρεσίες του Firebase για δεδομένα και ταυτοποίηση.
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
+  // Φίλτρα χρήστη: ID κατηγορίας, χρονική περίοδος και επιλεγμένο tab.
   String? _selectedCategoryId;
   String _selectedPeriod = 'All';
-  int tabIndex = 0; // 0 = upcoming, 1 = completed
+  int tabIndex = 0; // 0 για επερχόμενα ραντεβού, 1 για ολοκληρωμένα.
 
-  // Helper συνάρτηση για ασφαλή ανάκτηση μεταφρασμένου κειμένου
+  /// Βοηθητική μέθοδος για τη δυναμική μετάφραση πεδίων.
+  /// Ελέγχει αν το πεδίο είναι Map (πολυγλωσσικό) ή απλό String.
   String _getTranslated(
     Map<String, dynamic> data,
     String fieldKey,
     String lang,
     String fallback,
   ) {
-    // Προσπάθεια ανάγνωσης από το Map των μεταφράσεων (π.χ. serviceNameMap)
     final mapField = data['${fieldKey}Map'];
     if (mapField is Map) {
       return mapField[lang]?.toString() ??
           mapField['en']?.toString() ??
           fallback;
     }
-    // Fallback στο απλό String πεδίο (για παλιά ραντεβού)
     return data[fieldKey]?.toString() ?? fallback;
   }
 
@@ -43,6 +46,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     final t = AppLocalizations.of(context)!;
     final user = _auth.currentUser;
 
+    // Επιστροφή μηνύματος αν ο χρήστης δεν είναι συνδεδεμένος.
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: Text(t.appointmentHistory)),
@@ -64,14 +68,19 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
       ),
       body: Column(
         children: [
-          _buildFilters(),
-          _buildTabs(t),
-          Expanded(child: _buildAppointmentsList(user.uid)),
+          _buildFilters(), // Widget: Επιλογή κατηγορίας και χρόνου.
+          _buildTabs(t), // Widget: Εναλλαγή Upcoming/Completed.
+          Expanded(
+            child: _buildAppointmentsList(user.uid),
+          ), // Widget: Η δυναμική λίστα των ραντεβού.
         ],
       ),
     );
   }
 
+  // --- Widgets Διεπαφής (UI Components) ---
+
+  /// Δημιουργεί τα Dropdown μενού για το φιλτράρισμα των δεδομένων.
   Widget _buildFilters() {
     final t = AppLocalizations.of(context)!;
     final lang = Localizations.localeOf(context).languageCode;
@@ -81,6 +90,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
       color: Colors.white,
       child: Row(
         children: [
+          // Φίλτρο Κατηγορίας μέσω Stream από το Firestore.
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _db.collection('categories').snapshots(),
@@ -98,7 +108,6 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
                     if (snapshot.hasData)
                       ...snapshot.data!.docs.map((doc) {
                         final data = doc.data() as Map<String, dynamic>;
-                        // Δυναμική μετάφραση ονόματος κατηγορίας στο φίλτρο
                         final name = data['name'] is Map
                             ? (data['name'][lang] ?? data['name']['en'] ?? "")
                             : (data['name'] ?? "").toString();
@@ -114,6 +123,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
             ),
           ),
           const SizedBox(width: 10),
+          // Φίλτρο Χρονικής Περιόδου.
           Expanded(
             child: DropdownButton<String>(
               isExpanded: true,
@@ -145,6 +155,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Δημιουργεί τα κουμπιά εναλλαγής μεταξύ επερχόμενων και ολοκληρωμένων.
   Widget _buildTabs(AppLocalizations t) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -158,6 +169,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Μεμονωμένο κουμπί Tab με οπτική ένδειξη επιλογής.
   Widget _tabButton(int index, String label) {
     bool active = tabIndex == index;
     return Expanded(
@@ -185,6 +197,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Η κύρια λίστα που ανακτά, φιλτράρει και εμφανίζει τα ραντεβού.
   Widget _buildAppointmentsList(String uid) {
     final t = AppLocalizations.of(context)!;
 
@@ -194,16 +207,15 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           .where("userId", isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
+        if (snapshot.hasError)
           return Center(child: Text(t.historyError(snapshot.error.toString())));
-        }
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData)
           return const Center(child: CircularProgressIndicator());
-        }
 
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
 
+        // Λογική φιλτραρίσματος των εγγράφων βάσει των επιλογών του χρήστη.
         List<QueryDocumentSnapshot> filteredDocs = snapshot.data!.docs.where((
           doc,
         ) {
@@ -214,33 +226,34 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
           final appointmentDay = DateTime(date.year, date.month, date.day);
 
           bool isPast = date.isBefore(now);
-          if (tabIndex == 0 && isPast) return false;
-          if (tabIndex == 1 && !isPast) return false;
+          if (tabIndex == 0 && isPast)
+            return false; // Κρύψε τα παλιά αν είμαστε στο "Upcoming".
+          if (tabIndex == 1 && !isPast)
+            return false; // Κρύψε τα νέα αν είμαστε στο "Completed".
 
           if (_selectedCategoryId != null &&
-              data['categoryId'] != _selectedCategoryId) {
+              data['categoryId'] != _selectedCategoryId)
             return false;
-          }
 
-          if (_selectedPeriod == 'Day') {
-            if (appointmentDay != today) return false;
-          } else if (_selectedPeriod == 'Week') {
+          // Φιλτράρισμα βάσει χρονικού εύρους.
+          if (_selectedPeriod == 'Day' && appointmentDay != today) return false;
+          if (_selectedPeriod == 'Week') {
             final sevenDaysFromNow = today.add(const Duration(days: 7));
             if (appointmentDay.isBefore(today) ||
-                appointmentDay.isAfter(sevenDaysFromNow)) {
+                appointmentDay.isAfter(sevenDaysFromNow))
               return false;
-            }
-          } else if (_selectedPeriod == 'Month') {
+          }
+          if (_selectedPeriod == 'Month') {
             final thirtyDaysFromNow = today.add(const Duration(days: 30));
             if (appointmentDay.isBefore(today) ||
-                appointmentDay.isAfter(thirtyDaysFromNow)) {
+                appointmentDay.isAfter(thirtyDaysFromNow))
               return false;
-            }
           }
 
           return true;
         }).toList();
 
+        // Ταξινόμηση αποτελεσμάτων.
         filteredDocs.sort((a, b) {
           final dateA =
               (a.data() as Map<String, dynamic>)['dateTime'] as Timestamp;
@@ -251,18 +264,17 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
               : dateB.compareTo(dateA);
         });
 
+        // Υπολογισμός στατιστικών (σύνολο κόστους και λεπτών).
         double totalCost = 0;
         double totalMinutes = 0;
-
         for (var doc in filteredDocs) {
           final data = doc.data() as Map<String, dynamic>;
           totalCost += (data['cost'] ?? 0).toDouble();
           totalMinutes += (data['duration'] ?? 0).toDouble();
         }
 
-        if (filteredDocs.isEmpty) {
+        if (filteredDocs.isEmpty)
           return Center(child: Text(t.historyNoResults));
-        }
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -279,6 +291,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Κάρτα σύνοψης που εμφανίζει συγκεντρωτικά στοιχεία (Πλήθος, Κόστος, Ώρες).
   Widget _buildSummaryCard(
     AppLocalizations t,
     int count,
@@ -308,6 +321,7 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Widget για την προβολή ενός μεμονωμένου στατιστικού στοιχείου.
   Widget _summaryItem(String label, String value) {
     return Column(
       children: [
@@ -327,12 +341,12 @@ class _AppointmentsHistoryPageState extends State<AppointmentsHistoryPage> {
     );
   }
 
+  /// Δημιουργεί την οπτική κάρτα για κάθε ραντεβού στη λίστα.
   Widget _buildAppointmentCard(AppLocalizations t, Map<String, dynamic> data) {
     final lang = Localizations.localeOf(context).languageCode;
     final date = (data['dateTime'] as Timestamp).toDate();
     final formatted = DateFormat('dd/MM/yyyy HH:mm').format(date);
 
-    // Δυναμική μετάφραση με χρήση των Maps
     final serviceName = _getTranslated(
       data,
       'serviceName',

@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:appointly/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-// Ορισμός των διαθέσιμων φίλτρων
+// Ορισμός των διαθέσιμων φίλτρων για την προβολή των ραντεβού (Όλα, Ημέρα, Εβδομάδα, Μήνας).
 enum AppointmentFilter { all, day, week, month }
 
 class HomePage extends StatefulWidget {
@@ -15,13 +15,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Instances για την επικοινωνία με τη βάση δεδομένων (Firestore) και την αυθεντικοποίηση (Auth).
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Κατάσταση του επιλεγμένου φίλτρου
+  // Η τρέχουσα κατάσταση του επιλεγμένου φίλτρου προβολής.
   AppointmentFilter _activeFilter = AppointmentFilter.all;
 
-  // Helper συνάρτηση για ασφαλή ανάκτηση μεταφρασμένου κειμένου
+  /// Βοηθητική συνάρτηση μετάφρασης που διαχειρίζεται πεδία Map (π.χ. {'el': '...', 'en': '...'})
+  /// ή απλά String από το Firestore.
   String _getTranslated(
     Map<String, dynamic> data,
     String fieldKey,
@@ -37,7 +39,7 @@ class _HomePageState extends State<HomePage> {
     return data[fieldKey]?.toString() ?? fallback;
   }
 
-  // Μέθοδος ακύρωσης και οριστικής διαγραφής από τη βάση
+  /// Εμφανίζει διάλογο επιβεβαίωσης και διαγράφει οριστικά ένα ραντεβού από τη βάση.
   Future<void> _cancelAppointment(String docId) async {
     final t = AppLocalizations.of(context)!;
 
@@ -61,6 +63,7 @@ class _HomePageState extends State<HomePage> {
 
     if (confirm == true) {
       try {
+        // Διαγραφή του εγγράφου από τη συλλογή 'appointments'.
         await _db.collection('appointments').doc(docId).delete();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -80,11 +83,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
+  /// Ελέγχει αν δύο ημερομηνίες συμπίπτουν στην ίδια μέρα.
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
+  /// Επιτρέπει την αλλαγή ημερομηνίας και ώρας ενός υπάρχοντος ραντεβού.
   Future<void> _editAppointment(String docId, DateTime currentDate) async {
+    // Επιλογή νέας ημερομηνίας.
     final newDate = await showDatePicker(
       context: context,
       initialDate: currentDate.isAfter(DateTime.now())
@@ -94,11 +99,14 @@ class _HomePageState extends State<HomePage> {
       lastDate: DateTime.now().add(const Duration(days: 60)),
     );
     if (newDate == null) return;
+
+    // Επιλογή νέας ώρας.
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(currentDate),
     );
     if (time == null) return;
+
     final finalDateTime = DateTime(
       newDate.year,
       newDate.month,
@@ -106,6 +114,8 @@ class _HomePageState extends State<HomePage> {
       time.hour,
       time.minute,
     );
+
+    // Ενημέρωση του πεδίου 'dateTime' στο Firestore.
     await _db.collection('appointments').doc(docId).update({
       'dateTime': Timestamp.fromDate(finalDateTime),
     });
@@ -128,6 +138,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
         actions: [
+          // Μενού επιλογής φίλτρου περιόδου.
           PopupMenuButton<AppointmentFilter>(
             icon: const Icon(Icons.filter_list_rounded),
             onSelected: (filter) => setState(() => _activeFilter = filter),
@@ -155,6 +166,7 @@ class _HomePageState extends State<HomePage> {
       body: uid == null
           ? _buildEmptyState(context, t)
           : StreamBuilder<QuerySnapshot>(
+              // Παρακολούθηση των ενεργών ραντεβού του χρήστη σε πραγματικό χρόνο.
               stream: _db
                   .collection('appointments')
                   .where('userId', isEqualTo: uid)
@@ -163,13 +175,16 @@ class _HomePageState extends State<HomePage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return const Center(child: CircularProgressIndicator());
+
                 final allDocs = snapshot.data?.docs ?? [];
                 final now = DateTime.now();
 
+                // Φιλτράρισμα των δεδομένων στην πλευρά του client.
                 final filteredDocs = allDocs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final dt = (data['dateTime'] as Timestamp).toDate();
-                  // Εμφανίζουμε και τα περασμένα ραντεβού (έως 10 λεπτά πριν) για να φαίνονται ως γκρι
+
+                  // Αγνοούμε ραντεβού παλαιότερα του ενός έτους.
                   if (dt.isBefore(now.subtract(const Duration(days: 365))))
                     return false;
 
@@ -185,22 +200,19 @@ class _HomePageState extends State<HomePage> {
                   }
                 }).toList();
 
-                filteredDocs.sort((a, b) {
-                  final dateA =
-                      (a.data() as Map<String, dynamic>)['dateTime']
-                          as Timestamp;
-                  final dateB =
-                      (b.data() as Map<String, dynamic>)['dateTime']
-                          as Timestamp;
-                  return dateA.compareTo(dateB);
-                });
+                // Ταξινόμηση βάσει ημερομηνίας.
+                filteredDocs.sort(
+                  (a, b) => ((a.data() as Map)['dateTime'] as Timestamp)
+                      .compareTo((b.data() as Map)['dateTime'] as Timestamp),
+                );
 
                 if (filteredDocs.isEmpty) return _buildEmptyState(context, t);
 
+                // Ομαδοποίηση σε Σήμερα, Επερχόμενα και Παρελθόντα.
                 final todaysDocs = filteredDocs
                     .where(
                       (d) => _isSameDay(
-                        (d.data() as Map<String, dynamic>)['dateTime'].toDate(),
+                        (d.data() as Map)['dateTime'].toDate(),
                         now,
                       ),
                     )
@@ -208,27 +220,21 @@ class _HomePageState extends State<HomePage> {
                 final upcomingDocs = filteredDocs
                     .where(
                       (d) =>
-                          (d.data() as Map<String, dynamic>)['dateTime']
-                              .toDate()
-                              .isAfter(now) &&
+                          (d.data() as Map)['dateTime'].toDate().isAfter(now) &&
                           !_isSameDay(
-                            (d.data() as Map<String, dynamic>)['dateTime']
-                                .toDate(),
+                            (d.data() as Map)['dateTime'].toDate(),
                             now,
                           ),
                     )
                     .toList();
-
-                // Συμπεριλαμβάνουμε τα περασμένα στη λίστα για να φαίνονται γκρι
                 final pastDocs = filteredDocs
                     .where(
                       (d) =>
-                          (d.data() as Map<String, dynamic>)['dateTime']
-                              .toDate()
-                              .isBefore(now) &&
+                          (d.data() as Map)['dateTime'].toDate().isBefore(
+                            now,
+                          ) &&
                           !_isSameDay(
-                            (d.data() as Map<String, dynamic>)['dateTime']
-                                .toDate(),
+                            (d.data() as Map)['dateTime'].toDate(),
                             now,
                           ),
                     )
@@ -246,11 +252,9 @@ class _HomePageState extends State<HomePage> {
                           t: t,
                           id: doc.id,
                           data: doc.data() as Map<String, dynamic>,
-                          date: (doc.data() as Map<String, dynamic>)['dateTime']
-                              .toDate(),
+                          date: doc['dateTime'].toDate(),
                         ),
                       ),
-                      const SizedBox(height: 24),
                     ],
                     if (upcomingDocs.isNotEmpty || pastDocs.isNotEmpty) ...[
                       _buildSectionTitle(t.upcomingAppointments),
@@ -261,8 +265,7 @@ class _HomePageState extends State<HomePage> {
                           t: t,
                           id: doc.id,
                           data: doc.data() as Map<String, dynamic>,
-                          date: (doc.data() as Map<String, dynamic>)['dateTime']
-                              .toDate(),
+                          date: doc['dateTime'].toDate(),
                         ),
                       ),
                       ...pastDocs.map(
@@ -271,8 +274,7 @@ class _HomePageState extends State<HomePage> {
                           t: t,
                           id: doc.id,
                           data: doc.data() as Map<String, dynamic>,
-                          date: (doc.data() as Map<String, dynamic>)['dateTime']
-                              .toDate(),
+                          date: doc['dateTime'].toDate(),
                         ),
                       ),
                     ],
@@ -285,6 +287,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Εμφανίζει μια γραφική απεικόνιση όταν δεν υπάρχουν ραντεβού.
   Widget _buildEmptyState(BuildContext context, AppLocalizations t) {
     return Center(
       child: Padding(
@@ -324,6 +327,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Τίτλος ενότητας (π.χ. "Σήμερα").
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
@@ -338,6 +342,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Κουμπί για μετάβαση στο πλήρες ιστορικό.
   Widget _buildHistoryButton(BuildContext context, AppLocalizations t) {
     return SizedBox(
       width: double.infinity,
@@ -355,6 +360,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// Widget κάρτας που εμφανίζει λεπτομέρειες υπηρεσίας, κόστους και παρόχου.
   Widget _buildAppointmentCard({
     required BuildContext context,
     required AppLocalizations t,
@@ -363,10 +369,7 @@ class _HomePageState extends State<HomePage> {
     required DateTime date,
   }) {
     final lang = Localizations.localeOf(context).languageCode;
-
-    // Έλεγχος αν το ραντεβού έχει περάσει
     final bool isPast = date.isBefore(DateTime.now());
-
     final serviceName = _getTranslated(data, 'serviceName', lang, 'Service');
     final providerName = _getTranslated(data, 'providerName', lang, 'Provider');
     final categoryName = _getTranslated(data, 'categoryName', lang, '');
@@ -390,8 +393,9 @@ class _HomePageState extends State<HomePage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Opacity(
-          // Γκρι εμφάνιση αν έχει περάσει
-          opacity: isPast ? 0.6 : 1.0,
+          opacity: isPast
+              ? 0.6
+              : 1.0, // Μειωμένη φωτεινότητα για παλιά ραντεβού.
           child: IntrinsicHeight(
             child: Row(
               children: [
@@ -531,8 +535,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ],
-
-                        // Απόκρυψη κουμπιών αν το ραντεβού έχει περάσει
                         if (!isPast) ...[
                           const Divider(height: 24),
                           Row(
@@ -560,7 +562,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ] else ...[
                           const SizedBox(height: 12),
-                          // Χρησιμοποιούμε τη μετάφραση αντί για στατικό κείμενο
                           Text(
                             t.pastAppointment,
                             style: const TextStyle(

@@ -11,6 +11,7 @@ import 'l10n/app_localizations.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Αρχικοποίηση Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -26,7 +27,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Χρήση Consumer για να ενημερώνεται η locale αμέσως
+    // Χρήση Consumer για να αντιδρά η εφαρμογή στις αλλαγές γλώσσας
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
         return MaterialApp(
@@ -39,12 +40,14 @@ class MainApp extends StatelessWidget {
             Locale('fr'),
             Locale('es'),
           ],
+          // Delegates για τη μετάφραση των standard widgets (ημερολόγια, μενού κλπ)
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          // Ορισμός ονομαστικών διαδρομών
           routes: {
             '/appointments_history': (context) =>
                 const AppointmentsHistoryPage(),
@@ -54,7 +57,7 @@ class MainApp extends StatelessWidget {
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
             scaffoldBackgroundColor: Colors.white,
-            // Αφαιρέσαμε το CardTheme που δημιουργούσε σφάλματα έκδοσης
+            // Ρύθμιση της εμφάνισης των πεδίων εισαγωγής κειμένου
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: Colors.grey[50],
